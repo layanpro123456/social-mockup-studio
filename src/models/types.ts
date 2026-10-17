@@ -50,6 +50,8 @@ export interface ChatMessage {
 
 export interface ChatContent {
   conversationTitle: string;
+  contactAvatarUrl?: string;
+  contactIsOnline?: boolean;
   participants: Array<{
     id: string;
     name: string;
@@ -107,6 +109,8 @@ export interface ProfileCardContent {
 export interface StoryContent {
   displayName: string;
   handle: string;
+  avatarUrl?: string;
+  hasStoryRing?: boolean;
   timestamp: string;
   caption: string;
   backgroundColor?: string;
@@ -117,6 +121,7 @@ export interface StoryContent {
 export interface ShortVideoContent {
   creator: string;
   handle: string;
+  avatarUrl?: string;
   caption: string;
   audioTrack?: string;
 }
@@ -146,6 +151,7 @@ export interface NotificationBannerConfig {
   title: string;
   message: string;
   avatarEmoji?: string;
+  avatarUrl?: string;
 }
 
 export interface MockupProject {

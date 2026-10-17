@@ -45,21 +45,35 @@ export const NotificationBanner: React.FC<NotificationBannerProps> = ({
       {/* Top App Identity Row */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <div
-            style={{
-              width: 18,
-              height: 18,
-              borderRadius: 5,
-              backgroundColor: '#3b82f6',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 11,
-              color: '#ffffff',
-            }}
-          >
-            {emoji}
-          </div>
+          {config.avatarUrl ? (
+            <img
+              src={config.avatarUrl}
+              alt={title}
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 5,
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: 18,
+                height: 18,
+                borderRadius: 5,
+                backgroundColor: '#3b82f6',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 11,
+                color: '#ffffff',
+              }}
+            >
+              {emoji}
+            </div>
+          )}
           <span
             style={{
               fontSize: 10,

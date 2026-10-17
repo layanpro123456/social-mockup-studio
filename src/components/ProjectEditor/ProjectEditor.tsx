@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   MockupProject,
   PresetStyle,
@@ -20,7 +20,20 @@ import {
   revokeManagedObjectURL,
 } from '../../features/safety/AssetSanitizer';
 import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
-import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles, Smartphone, MessageSquare, ShieldCheck, Check } from 'lucide-react';
+import {
+  AlertTriangle,
+  Plus,
+  Trash2,
+  Info,
+  ShieldAlert,
+  Mic,
+  Sparkles,
+  Smartphone,
+  MessageSquare,
+  ShieldCheck,
+  Check,
+  Upload,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -28,6 +41,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { MockupAvatar } from '../common/MockupAvatar';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -39,6 +53,149 @@ interface TemplateFieldsProps<T> {
   onUpdate: (partial: Partial<T>) => void;
   onValidate: (text: string) => void;
 }
+
+interface AvatarUploadFieldProps {
+  label: string;
+  avatarUrl?: string;
+  name: string;
+  size?: number;
+  showOnlineToggle?: boolean;
+  isOnline?: boolean;
+  onOnlineToggle?: (online: boolean) => void;
+  showStoryRingToggle?: boolean;
+  hasStoryRing?: boolean;
+  onStoryRingToggle?: (ring: boolean) => void;
+  onChange: (url: string) => void;
+}
+
+const AvatarUploadField: React.FC<AvatarUploadFieldProps> = ({
+  label,
+  avatarUrl,
+  name,
+  size = 42,
+  showOnlineToggle = false,
+  isOnline = true,
+  onOnlineToggle,
+  showStoryRingToggle = false,
+  hasStoryRing = true,
+  onStoryRingToggle,
+  onChange,
+}) => {
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      setError(validation.error || 'Invalid image file.');
+      e.target.value = '';
+      return;
+    }
+
+    setError(null);
+    if (avatarUrl && avatarUrl.startsWith('blob:')) {
+      revokeManagedObjectURL(avatarUrl);
+    }
+    const url = createManagedObjectURL(file);
+    onChange(url);
+    e.target.value = '';
+  };
+
+  const handleRemove = () => {
+    if (avatarUrl && avatarUrl.startsWith('blob:')) {
+      revokeManagedObjectURL(avatarUrl);
+    }
+    onChange('');
+    setError(null);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="text-xs font-medium text-slate-400">{label}</div>
+      <div className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-900/60 border border-slate-800">
+        <MockupAvatar
+          src={avatarUrl}
+          name={name}
+          size={size}
+          showOnlineDot={showOnlineToggle && isOnline}
+          storyRing={showStoryRingToggle && hasStoryRing}
+        />
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex items-center gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              className="h-7 text-xs px-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200"
+            >
+              <Upload size={12} className="mr-1.5" />
+              {avatarUrl ? 'Change' : 'Upload Photo'}
+            </Button>
+            {avatarUrl && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleRemove}
+                className="h-7 text-xs px-2 text-red-400 hover:text-red-300 hover:bg-red-500/10"
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+          <p className="text-[10px] text-slate-400 truncate">
+            {avatarUrl ? 'Custom photo active' : 'Initial letters fallback'}
+          </p>
+        </div>
+      </div>
+
+      {(showOnlineToggle || showStoryRingToggle) && (
+        <div className="flex items-center gap-4 pt-0.5">
+          {showOnlineToggle && onOnlineToggle && (
+            <label className="text-[11px] text-slate-300 flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isOnline}
+                onChange={(e) => onOnlineToggle(e.target.checked)}
+                className="rounded border-slate-700 bg-slate-800"
+              />
+              Online Status Dot 🟢
+            </label>
+          )}
+          {showStoryRingToggle && onStoryRingToggle && (
+            <label className="text-[11px] text-slate-300 flex items-center gap-1.5 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={hasStoryRing}
+                onChange={(e) => onStoryRingToggle(e.target.checked)}
+                className="rounded border-slate-700 bg-slate-800"
+              />
+              Gradient Story Ring 🎨
+            </label>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <Alert variant="destructive" className="py-2 px-3 text-xs">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-xs">{error}</AlertDescription>
+        </Alert>
+      )}
+    </div>
+  );
+};
 
 const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
   content,
@@ -107,6 +264,16 @@ const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
           style={{ width: '100%' }}
         />
       </div>
+
+      <AvatarUploadField
+        label="Contact Profile Picture"
+        avatarUrl={content.contactAvatarUrl}
+        name={content.conversationTitle || 'Alex Parker'}
+        showOnlineToggle
+        isOnline={content.contactIsOnline ?? true}
+        onOnlineToggle={(online) => onUpdate({ contactIsOnline: online })}
+        onChange={(url) => onUpdate({ contactAvatarUrl: url })}
+      />
 
       <div>
         <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
@@ -268,6 +435,13 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
           style={{ width: '100%' }}
         />
       </div>
+
+      <AvatarUploadField
+        label="Author Profile Picture"
+        avatarUrl={content.avatarUrl}
+        name={content.displayName || 'Author'}
+        onChange={(url) => onUpdate({ avatarUrl: url })}
+      />
       <div>
         <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
           Caption / Body
@@ -406,6 +580,14 @@ const ProfileCardEditorFields: React.FC<TemplateFieldsProps<ProfileCardContent>>
           style={{ width: '100%' }}
         />
       </div>
+
+      <AvatarUploadField
+        label="Profile Picture"
+        avatarUrl={content.avatarUrl}
+        name={content.displayName || 'Profile'}
+        size={50}
+        onChange={(url) => onUpdate({ avatarUrl: url })}
+      />
       <div>
         <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
           Bio Description
@@ -459,6 +641,16 @@ const StoryEditorFields: React.FC<TemplateFieldsProps<StoryContent>> = ({
           style={{ width: '100%' }}
         />
       </div>
+
+      <AvatarUploadField
+        label="Story Creator Picture"
+        avatarUrl={content.avatarUrl}
+        name={content.displayName || 'Creator'}
+        showStoryRingToggle
+        hasStoryRing={content.hasStoryRing ?? true}
+        onStoryRingToggle={(ring) => onUpdate({ hasStoryRing: ring })}
+        onChange={(url) => onUpdate({ avatarUrl: url })}
+      />
       <div>
         <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
           Story Sticker Caption
@@ -536,6 +728,13 @@ const ShortVideoEditorFields: React.FC<TemplateFieldsProps<ShortVideoContent>> =
           style={{ width: '100%' }}
         />
       </div>
+
+      <AvatarUploadField
+        label="Creator Profile Picture"
+        avatarUrl={content.avatarUrl}
+        name={content.creator || 'Creator'}
+        onChange={(url) => onUpdate({ avatarUrl: url })}
+      />
       <div>
         <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
           Reel Caption
@@ -1016,6 +1215,23 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
                       />
                     </div>
                   </div>
+
+                  <AvatarUploadField
+                    label="Sender Profile Photo (Optional)"
+                    avatarUrl={project.notificationBanner?.avatarUrl}
+                    name={project.notificationBanner?.title || 'Notification'}
+                    size={36}
+                    onChange={(url) => {
+                      onChange({
+                        ...project,
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
+                          enabled: true,
+                          avatarUrl: url,
+                        },
+                      });
+                    }}
+                  />
 
                   <div className="ui-field">
                     <label>Message Preview</label>

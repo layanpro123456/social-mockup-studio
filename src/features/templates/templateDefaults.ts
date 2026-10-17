@@ -78,6 +78,7 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       title: 'Alex Parker',
       message: 'Hey, have you checked the new design prototype?',
       avatarEmoji: '💬',
+      avatarUrl: '',
     },
     content: {},
   };
@@ -86,6 +87,8 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
     case 'chat':
       baseProject.content = {
         conversationTitle: 'Fictional Project Chat',
+        contactAvatarUrl: '',
+        contactIsOnline: true,
         participants: [
           { id: 'user_1', name: 'Alex Parker (Sample)', handle: '@alex_fictional' },
           { id: 'user_2', name: 'Morgan Reed (Sample)', handle: '@morgan_demo' },
@@ -126,6 +129,7 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       baseProject.content = {
         displayName: 'Jordan Creative (Sample)',
         handle: '@jordan_fictional',
+        avatarUrl: '',
         timestamp: '2h ago',
         caption: 'Prototyping synthetic interfaces for our educational case study. Everything here is fictional!',
         imageUrl: '',
@@ -148,6 +152,7 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       baseProject.content = {
         displayName: 'Sam Storyboarder (Sample)',
         handle: '@sam_mockups',
+        avatarUrl: '',
         bio: 'Fictional educator & UI designer. Exploring sample datasets and storyboard sequences.',
         followersCount: 1250,
         followingCount: 340,
@@ -160,6 +165,8 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       baseProject.content = {
         displayName: 'Demo Creator',
         handle: '@demo_story',
+        avatarUrl: '',
+        hasStoryRing: true,
         timestamp: '3h ago',
         caption: 'Behind the scenes in the prototyping studio ✨',
         backgroundColor: '#1e1b4b',
@@ -170,6 +177,7 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       baseProject.content = {
         creator: 'Fictional Filmmaker',
         handle: '@reel_demo',
+        avatarUrl: '',
         caption: 'Scene 01: Concept walkthrough (Fictional mock sequence)',
         audioTrack: 'Original Sound - Fictional Studio Audio',
       };

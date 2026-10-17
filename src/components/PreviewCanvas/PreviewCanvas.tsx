@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { DeviceStatusBar } from '../DeviceStatusBar/DeviceStatusBar';
 import { NotificationBanner } from '../NotificationBanner/NotificationBanner';
+import { MockupAvatar } from '../common/MockupAvatar';
 
 interface PreviewCanvasProps {
   project: MockupProject;
@@ -112,22 +113,13 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   3
                 </span>
               </div>
-              <div
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: '50%',
-                  backgroundColor: '#075e54',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 16,
-                  fontWeight: 700,
-                  color: '#ffffff',
-                }}
-              >
-                💬
-              </div>
+              <MockupAvatar
+                src={content.contactAvatarUrl}
+                name={content.conversationTitle || 'Fictional Chat'}
+                size={36}
+                accentColor="#075e54"
+                showOnlineDot={content.contactIsOnline ?? true}
+              />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {content.conversationTitle || 'Fictional Chat'}
@@ -356,21 +348,13 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               gap: 12,
             }}
           >
-            <div
-              style={{
-                width: 38,
-                height: 38,
-                borderRadius: '50%',
-                backgroundColor: theme.accent || '#3b82f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: 14,
-              }}
-            >
-              💬
-            </div>
+            <MockupAvatar
+              src={content.contactAvatarUrl}
+              name={content.conversationTitle || 'Fictional Conversation'}
+              size={38}
+              accentColor={theme.accent || '#3b82f6'}
+              showOnlineDot={content.contactIsOnline ?? true}
+            />
             <div style={{ flex: 1, minWidth: 0 }}>
               <div
                 style={{
@@ -575,22 +559,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    backgroundColor: '#1877f2',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: 16,
-                  }}
-                >
-                  {content.displayName ? content.displayName.charAt(0) : 'F'}
-                </div>
+                <MockupAvatar
+                  src={content.avatarUrl}
+                  name={content.displayName || 'Facebook User'}
+                  size={40}
+                  accentColor="#1877f2"
+                />
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 14 }}>{content.displayName}</div>
                   <div style={{ fontSize: 12, color: '#65676b', display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -773,22 +747,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             {/* Author Row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <div
-                  style={{
-                    width: 40,
-                    height: 40,
-                    borderRadius: '50%',
-                    backgroundColor: '#1d9bf0',
-                    color: '#ffffff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: 16,
-                  }}
-                >
-                  {content.displayName ? content.displayName.charAt(0) : 'X'}
-                </div>
+                <MockupAvatar
+                  src={content.avatarUrl}
+                  name={content.displayName || 'X User'}
+                  size={40}
+                  accentColor="#1d9bf0"
+                />
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 15, color: '#f7f9f9' }}>{content.displayName}</div>
                   <div style={{ fontSize: 13, color: '#71767b' }}>
@@ -942,21 +906,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Post Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div
-              style={{
-                width: 44,
-                height: 44,
-                borderRadius: '50%',
-                backgroundColor: theme.accent || '#3b82f6',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 700,
-                fontSize: 16,
-              }}
-            >
-              {content.displayName ? content.displayName.charAt(0) : 'F'}
-            </div>
+            <MockupAvatar
+              src={content.avatarUrl}
+              name={content.displayName || 'Feed User'}
+              size={44}
+              accentColor={theme.accent || '#3b82f6'}
+            />
             <div>
               <div style={{ fontWeight: 600, fontSize: 14 }}>{content.displayName}</div>
               <div style={{ fontSize: 12, color: '#94a3b8' }}>
@@ -1071,23 +1026,13 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
           <div style={{ height: 80, backgroundColor: theme.accent || '#3b82f6', opacity: 0.8 }} />
           <div style={{ padding: '0 20px 24px 20px', marginTop: -40 }}>
-            <div
-              style={{
-                width: 76,
-                height: 76,
-                borderRadius: '50%',
-                backgroundColor: '#0f172a',
-                border: '3px solid #1e293b',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontWeight: 800,
-                fontSize: 24,
-                color: '#38bdf8',
-              }}
-            >
-              {content.displayName ? content.displayName.charAt(0) : 'P'}
-            </div>
+            <MockupAvatar
+              src={content.avatarUrl}
+              name={content.displayName || 'Profile User'}
+              size={76}
+              accentColor="#0f172a"
+              style={{ border: '3px solid #1e293b' }}
+            />
 
             <div style={{ marginTop: 12 }}>
               <div style={{ fontWeight: 700, fontSize: 18 }}>{content.displayName}</div>
@@ -1172,34 +1117,12 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
 
             {/* Author Header */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 38,
-                  height: 38,
-                  borderRadius: '50%',
-                  background: 'linear-gradient(45deg, #f59e0b, #ec4899, #8b5cf6)',
-                  padding: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
-                <div
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    borderRadius: '50%',
-                    backgroundColor: '#1e1b4b',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontWeight: 700,
-                    fontSize: 14,
-                  }}
-                >
-                  {content.displayName ? content.displayName.charAt(0) : 'S'}
-                </div>
-              </div>
+              <MockupAvatar
+                src={content.avatarUrl}
+                name={content.displayName || 'Story Creator'}
+                size={36}
+                storyRing={content.hasStoryRing ?? true}
+              />
               <div>
                 <div style={{ fontWeight: 600, fontSize: 13 }}>{content.displayName}</div>
                 <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)' }}>
@@ -1387,11 +1310,22 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           >
             {/* Creator & Audio Info */}
             <div style={{ flex: 1, paddingRight: 16 }}>
-              <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 2 }}>
-                {content.creator || 'Fictional Creator'}
-              </div>
-              <div style={{ fontSize: 12, color: '#38bdf8', marginBottom: 6 }}>
-                {content.handle || '@mock_reel'}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+                <MockupAvatar
+                  src={content.avatarUrl}
+                  name={content.creator || 'Fictional Creator'}
+                  size={36}
+                  accentColor="#6366f1"
+                  style={{ border: '2px solid rgba(255,255,255,0.8)' }}
+                />
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>
+                    {content.creator || 'Fictional Creator'}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#38bdf8' }}>
+                    {content.handle || '@mock_reel'}
+                  </div>
+                </div>
               </div>
               <div style={{ fontSize: 13, color: '#e2e8f0', marginBottom: 8, lineHeight: 1.4 }}>
                 {content.caption}
