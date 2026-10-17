@@ -12,6 +12,8 @@ import {
   XCircle,
   ShieldAlert,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ExportPanelProps {
   project: MockupProject;
@@ -169,48 +171,36 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       <div className="ui-form">
         {/* Critical Fraud Warning Banner */}
         {fraudCheck.isBlocked && (
-          <aside
-            role="alert"
-            style={{
-              backgroundColor: 'rgba(239, 68, 68, 0.2)',
-              border: '1px solid #ef4444',
-              borderRadius: 8,
-              padding: 10,
-              fontSize: 12,
-              color: '#fca5a5',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: 4,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, color: '#f87171' }}>
-              <ShieldAlert size={16} /> Download Blocked
-            </div>
-            <div style={{ fontSize: 11, lineHeight: 1.4 }}>
+          <Alert variant="destructive" className="border-red-500/50 bg-red-950/40">
+            <ShieldAlert size={16} />
+            <AlertTitle className="text-xs font-bold text-red-400">Download Blocked</AlertTitle>
+            <AlertDescription className="text-xs text-red-300">
               Prohibited keywords found ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive terms like financial wires or legal notices to enable download.
-            </div>
-          </aside>
+            </AlertDescription>
+          </Alert>
         )}
 
         <div className="ui-field">
           <label>Image Quality & Format</label>
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button
+          <div className="flex gap-2">
+            <Button
               type="button"
+              variant={format === 'png' ? 'default' : 'secondary'}
+              size="sm"
               onClick={() => setFormat('png')}
-              className={format === 'png' ? 'btn-primary' : 'btn-secondary'}
-              style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
+              className="flex-1 justify-center text-xs"
             >
               PNG (Crystal Clear)
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant={format === 'jpeg' ? 'default' : 'secondary'}
+              size="sm"
               onClick={() => setFormat('jpeg')}
-              className={format === 'jpeg' ? 'btn-primary' : 'btn-secondary'}
-              style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
+              className="flex-1 justify-center text-xs"
             >
               JPG (Compressed)
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -234,23 +224,16 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         </div>
 
         {/* Image Export Button */}
-        <button
+        <Button
           type="button"
+          variant="default"
+          size="lg"
           onClick={handleExportImage}
           disabled={isExporting || fraudCheck.isBlocked}
-          className="btn-primary"
-          style={{
-            width: '100%',
-            justifyContent: 'center',
-            padding: '11px 16px',
-            fontSize: 14,
-            fontWeight: 700,
-            opacity: fraudCheck.isBlocked ? 0.5 : 1,
-            cursor: fraudCheck.isBlocked ? 'not-allowed' : 'pointer',
-          }}
+          className="w-full justify-center text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md transition-all"
         >
-          <Download size={16} /> Download Mockup ({format.toUpperCase()})
-        </button>
+          <Download size={16} className="mr-2" /> Download Mockup ({format.toUpperCase()})
+        </Button>
 
         {/* Video Export Option for Short Video Template */}
         {project.template === 'short-video' && (
@@ -277,24 +260,16 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             </div>
 
             {isVideoSupported ? (
-              <button
+              <Button
                 type="button"
+                variant="secondary"
+                size="sm"
                 onClick={handleExportVideo}
                 disabled={isExporting || fraudCheck.isBlocked}
-                className="btn-secondary"
-                style={{
-                  width: '100%',
-                  justifyContent: 'center',
-                  padding: '10px 16px',
-                  backgroundColor: 'rgba(56, 189, 248, 0.15)',
-                  borderColor: '#0284c7',
-                  color: '#e0f2fe',
-                  opacity: fraudCheck.isBlocked ? 0.5 : 1,
-                  cursor: fraudCheck.isBlocked ? 'not-allowed' : 'pointer',
-                }}
+                className="w-full justify-center bg-sky-500/15 border border-sky-500/40 text-sky-200 hover:bg-sky-500/25"
               >
-                <Video size={16} /> Export Animated WebM
-              </button>
+                <Video size={16} className="mr-2" /> Export Animated WebM
+              </Button>
             ) : (
               <div
                 style={{

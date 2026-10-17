@@ -24,6 +24,9 @@ import {
   Trash2,
   ShieldCheck,
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const App: React.FC = () => {
   const [project, setProject] = useState<MockupProject>(() => {
@@ -199,7 +202,9 @@ export const App: React.FC = () => {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h1>Social Mockup Studio</h1>
-              <span className="safety-pill">Fictional Mode Enforced</span>
+              <Badge variant="outline" className="border-emerald-500/40 bg-emerald-500/10 text-emerald-400 font-semibold px-2 py-0.5 text-[11px]">
+                Fictional Mode Enforced
+              </Badge>
             </div>
             <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1, fontWeight: 500 }}>
               Design realistic posts & chats for stories, prototypes & presentations
@@ -216,47 +221,52 @@ export const App: React.FC = () => {
             style={{ display: 'none' }}
           />
 
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleDuplicate}
-            className="btn-secondary"
             title="Duplicate Current Mockup"
           >
-            <Copy size={13} /> Duplicate
-          </button>
-          <button
+            <Copy size={13} className="mr-1.5" /> Duplicate
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleReset}
-            className="btn-secondary"
             title="Reset to Template Defaults"
           >
-            <RotateCcw size={13} /> Start Fresh
-          </button>
-          <button
+            <RotateCcw size={13} className="mr-1.5" /> Start Fresh
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleImportClick}
-            className="btn-secondary"
             title="Open Saved Mockup Project (.json)"
           >
-            <FileUp size={13} /> Open File
-          </button>
-          <button
+            <FileUp size={13} className="mr-1.5" /> Open File
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={() => exportProjectAsJSON(project)}
-            className="btn-secondary"
             title="Save Project File to Computer (.json)"
           >
-            <FileDown size={13} /> Save Project
-          </button>
-          <button
+            <FileDown size={13} className="mr-1.5" /> Save Project
+          </Button>
+          <Button
             type="button"
+            variant="ghost"
+            size="icon"
             onClick={handleDelete}
-            className="btn-secondary"
-            style={{ color: '#f87171' }}
+            className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
             title="Delete Project & Start Fresh"
           >
             <Trash2 size={13} />
-          </button>
+          </Button>
         </nav>
       </header>
 
@@ -283,29 +293,20 @@ export const App: React.FC = () => {
 
       {/* Global Error Banner */}
       {importError && (
-        <aside
-          role="alert"
-          style={{
-            backgroundColor: '#ef4444',
-            color: 'white',
-            padding: '8px 24px',
-            fontSize: 12,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <Alert variant="destructive" className="rounded-none border-x-0 border-t-0 py-2 px-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
             <AlertOctagon size={16} />
-            <span>{importError}</span>
+            <AlertDescription className="text-xs font-medium">{importError}</AlertDescription>
           </div>
-          <button
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setImportError(null)}
-            style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}
+            className="h-6 w-6 p-0 text-white hover:bg-white/20"
           >
             ✕
-          </button>
-        </aside>
+          </Button>
+        </Alert>
       )}
 
       {/* Main Studio Body */}

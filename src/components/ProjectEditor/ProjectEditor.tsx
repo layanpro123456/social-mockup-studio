@@ -21,6 +21,13 @@ import {
 } from '../../features/safety/AssetSanitizer';
 import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
 import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles, Smartphone, MessageSquare, ShieldCheck, Check } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -617,76 +624,52 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
   return (
     <form className="ui-form" onSubmit={(e) => e.preventDefault()}>
       {warningMessage && (
-        <aside
-          role="alert"
-          style={{
-            backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.15)',
-            border: `1px solid ${isCritical ? '#ef4444' : '#f59e0b'}`,
-            borderRadius: 8,
-            padding: '8px 12px',
-            color: isCritical ? '#fca5a5' : '#fde68a',
-            fontSize: 12,
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-          }}
+        <Alert
+          variant={isCritical ? 'destructive' : 'default'}
+          className={cn(
+            'py-2 px-3 text-xs flex items-center gap-2',
+            isCritical
+              ? 'border-red-500/50 bg-red-950/40 text-red-200'
+              : 'border-amber-500/50 bg-amber-950/30 text-amber-200'
+          )}
         >
-          {isCritical ? <ShieldAlert size={16} color="#ef4444" /> : <AlertTriangle size={16} color="#f59e0b" />}
-          <span>{warningMessage}</span>
-        </aside>
+          {isCritical ? <ShieldAlert size={16} /> : <AlertTriangle size={16} />}
+          <AlertDescription className="text-xs font-medium">{warningMessage}</AlertDescription>
+        </Alert>
       )}
 
       {/* Mockup Title Header */}
-      <div className="ui-field">
-        <label htmlFor="mockup-title-input">Mockup Title</label>
-        <input
+      <div className="space-y-1.5">
+        <Label htmlFor="mockup-title-input" className="text-xs font-medium text-slate-400">
+          Mockup Title
+        </Label>
+        <Input
           id="mockup-title-input"
           type="text"
           value={project.title}
           onChange={handleTitleChange}
           placeholder="e.g. Sample Generic Chat"
+          className="bg-slate-900 border-slate-800 text-sm h-9"
         />
       </div>
 
-      {/* Segmented Navigation Tab Bar */}
-      <nav role="tablist" aria-label="Editor Tabs" className="tab-group">
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'content'}
-          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
-          onClick={() => setActiveTab('content')}
-        >
-          <MessageSquare size={13} /> Content
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'style'}
-          className={`tab-btn ${activeTab === 'style' ? 'active' : ''}`}
-          onClick={() => setActiveTab('style')}
-        >
-          <Sparkles size={13} /> Style
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'phone'}
-          className={`tab-btn ${activeTab === 'phone' ? 'active' : ''}`}
-          onClick={() => setActiveTab('phone')}
-        >
-          <Smartphone size={13} /> Phone Bar
-        </button>
-        <button
-          type="button"
-          role="tab"
-          aria-selected={activeTab === 'watermark'}
-          className={`tab-btn ${activeTab === 'watermark' ? 'active' : ''}`}
-          onClick={() => setActiveTab('watermark')}
-        >
-          <ShieldCheck size={13} /> Watermark
-        </button>
-      </nav>
+      {/* shadcn Tabs Navigation */}
+      <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="w-full">
+        <TabsList className="grid grid-cols-4 w-full bg-slate-900/90 border border-slate-800 p-1 rounded-lg">
+          <TabsTrigger value="content" className="text-xs font-semibold">
+            <MessageSquare size={13} className="mr-1.5" /> Content
+          </TabsTrigger>
+          <TabsTrigger value="style" className="text-xs font-semibold">
+            <Sparkles size={13} className="mr-1.5" /> Style
+          </TabsTrigger>
+          <TabsTrigger value="phone" className="text-xs font-semibold">
+            <Smartphone size={13} className="mr-1.5" /> Phone Bar
+          </TabsTrigger>
+          <TabsTrigger value="watermark" className="text-xs font-semibold">
+            <ShieldCheck size={13} className="mr-1.5" /> Watermark
+          </TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {/* TAB 1: CONTENT */}
       {activeTab === 'content' && (

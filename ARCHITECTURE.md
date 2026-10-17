@@ -3,13 +3,13 @@
 ## 1. MVP stack
 A lightweight, client-side web app is recommended to work on modest hardware and avoid hosting costs.
 
-- **UI:** React + TypeScript + Vite
-- **Styling:** CSS modules or a small utility CSS setup
-- **State:** React state or a lightweight store
-- **Image export:** DOM-to-image or canvas rendering library, selected after a small proof of concept
-- **Video export:** frame capture plus browser-supported WebM recording; evaluate MP4 support separately
-- **Persistence:** browser local storage or IndexedDB
-- **Tests:** Vitest + React Testing Library; Playwright for key end-to-end flows
+- **UI:** React 19 + TypeScript + Vite 6 + shadcn/ui (Radix UI primitives)
+- **Styling:** Tailwind CSS + PostCSS + CSS variables
+- **State:** React state + hooks
+- **Image export:** html-to-image DOM rasterizer
+- **Video export:** frame capture plus browser-supported WebM recording
+- **Persistence:** browser local storage
+- **Tests:** Vitest + React Testing Library (jsdom)
 
 Avoid a backend in the MVP. If a backend is added later, define retention, access control, and deletion policies before storing user projects.
 
