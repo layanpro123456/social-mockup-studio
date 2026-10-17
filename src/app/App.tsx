@@ -181,9 +181,30 @@ export const App: React.FC = () => {
       {/* Top Header */}
       <header className="app-header">
         <div className="header-brand">
-          <Sparkles color="#6366f1" size={22} />
-          <h1>Social Mockup Studio</h1>
-          <span className="safety-pill">Fictional Mode Enforced</span>
+          <div
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 10,
+              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: '0 2px 10px rgba(99, 102, 241, 0.4)',
+              color: '#ffffff',
+            }}
+          >
+            <Sparkles size={18} />
+          </div>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <h1>Social Mockup Studio</h1>
+              <span className="safety-pill">Fictional Mode Enforced</span>
+            </div>
+            <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 1, fontWeight: 500 }}>
+              Design realistic posts & chats for stories, prototypes & presentations
+            </div>
+          </div>
         </div>
 
         <div className="header-actions">
@@ -199,9 +220,9 @@ export const App: React.FC = () => {
             type="button"
             onClick={handleDuplicate}
             className="btn-secondary"
-            title="Duplicate Current Project"
+            title="Duplicate Current Mockup"
           >
-            <Copy size={14} /> Duplicate
+            <Copy size={13} /> Duplicate
           </button>
           <button
             type="button"
@@ -209,32 +230,32 @@ export const App: React.FC = () => {
             className="btn-secondary"
             title="Reset to Template Defaults"
           >
-            <RotateCcw size={14} /> Reset
+            <RotateCcw size={13} /> Start Fresh
           </button>
           <button
             type="button"
             onClick={handleImportClick}
             className="btn-secondary"
-            title="Import Valid Project JSON"
+            title="Open Saved Mockup Project (.json)"
           >
-            <FileUp size={14} /> Import JSON
+            <FileUp size={13} /> Open File
           </button>
           <button
             type="button"
             onClick={() => exportProjectAsJSON(project)}
             className="btn-secondary"
-            title="Export Schema JSON"
+            title="Save Project File to Computer (.json)"
           >
-            <FileDown size={14} /> Export JSON
+            <FileDown size={13} /> Save Project
           </button>
           <button
             type="button"
             onClick={handleDelete}
             className="btn-secondary"
-            style={{ color: '#ef4444' }}
-            title="Delete Project"
+            style={{ color: '#f87171' }}
+            title="Delete Project & Start Fresh"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </header>
@@ -242,10 +263,10 @@ export const App: React.FC = () => {
       {/* Safety Policy Reminder Bar */}
       <div
         style={{
-          backgroundColor: 'rgba(30, 41, 59, 0.7)',
+          backgroundColor: 'rgba(15, 23, 42, 0.8)',
           borderBottom: '1px solid #1e293b',
           padding: '6px 24px',
-          fontSize: 11,
+          fontSize: 11.5,
           color: '#94a3b8',
           display: 'flex',
           alignItems: 'center',
@@ -254,8 +275,7 @@ export const App: React.FC = () => {
       >
         <ShieldCheck size={14} color="#38bdf8" />
         <span>
-          <strong>Ethical Boundary Reminder:</strong> Generated outputs are synthetic prototypes. Do not
-          create deceptive evidence or impersonate real people. Watermarks remain active on all exports.
+          <strong>Ethical Boundary Reminder:</strong> All mockups are synthetic prototypes for design, social media planning, and storytelling. Permanent "FICTIONAL MOCKUP" label is automatically applied to all exports.
         </span>
       </div>
 
@@ -290,7 +310,7 @@ export const App: React.FC = () => {
         {/* Left Column: Templates & Editor */}
         <aside className="sidebar">
           <div className="sidebar-section">
-            <div className="sidebar-title">1. Select Template</div>
+            <div className="sidebar-title">1. Choose a Format</div>
             <TemplateGallery
               currentTemplate={project.template}
               onSelectTemplate={handleSelectTemplate}
@@ -298,7 +318,7 @@ export const App: React.FC = () => {
           </div>
 
           <div className="sidebar-section" style={{ flex: 1 }}>
-            <div className="sidebar-title">2. Customize Content</div>
+            <div className="sidebar-title">2. Edit Mockup</div>
             <ProjectEditor project={project} onChange={setProject} />
           </div>
         </aside>

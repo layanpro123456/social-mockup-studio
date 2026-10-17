@@ -153,14 +153,17 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
     <div className="export-pane">
       <div
         style={{
-          fontWeight: 700,
-          fontSize: 14,
-          letterSpacing: '0.05em',
-          color: '#9ca3af',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontWeight: 800,
+          fontSize: 12,
+          letterSpacing: '0.06em',
+          color: '#94a3b8',
           textTransform: 'uppercase',
         }}
       >
-        Export Studio
+        <Download size={14} color="#818cf8" /> 3. Download Mockup
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -180,35 +183,34 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, color: '#f87171' }}>
-              <ShieldAlert size={16} /> Security Export Gate Blocked
+              <ShieldAlert size={16} /> Download Blocked
             </div>
             <div style={{ fontSize: 11, lineHeight: 1.4 }}>
-              Prohibited content detected ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive phrases
-              to enable export.
+              Prohibited keywords found ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive terms like financial wires or legal notices to enable download.
             </div>
           </div>
         )}
 
         <div>
-          <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
-            Image Format
+          <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#9ca3af', marginBottom: 6 }}>
+            Image Quality & Format
           </label>
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               type="button"
               onClick={() => setFormat('png')}
               className={format === 'png' ? 'btn-primary' : 'btn-secondary'}
-              style={{ flex: 1, justifyContent: 'center' }}
+              style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
             >
-              PNG (Lossless)
+              PNG (Crystal Clear)
             </button>
             <button
               type="button"
               onClick={() => setFormat('jpeg')}
               className={format === 'jpeg' ? 'btn-primary' : 'btn-secondary'}
-              style={{ flex: 1, justifyContent: 'center' }}
+              style={{ flex: 1, justifyContent: 'center', fontSize: 12 }}
             >
-              JPG
+              JPG (Compressed)
             </button>
           </div>
         </div>
@@ -228,11 +230,10 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-            <ShieldCheck size={16} /> Trust & Safety Verified
+            <ShieldCheck size={16} /> Trust & Safety Active
           </div>
           <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-            Visible <strong>{MANDATORY_WATERMARK_TEXT}</strong> watermark will be rendered into all exported
-            images and video frames.
+            Visible <strong>{MANDATORY_WATERMARK_TEXT}</strong> watermark is permanently applied to all exported images and video frames.
           </div>
         </div>
 
@@ -245,12 +246,14 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           style={{
             width: '100%',
             justifyContent: 'center',
-            padding: '10px 16px',
+            padding: '11px 16px',
+            fontSize: 14,
+            fontWeight: 700,
             opacity: fraudCheck.isBlocked ? 0.5 : 1,
             cursor: fraudCheck.isBlocked ? 'not-allowed' : 'pointer',
           }}
         >
-          <Download size={16} /> Export Image ({format.toUpperCase()})
+          <Download size={16} /> Download Mockup ({format.toUpperCase()})
         </button>
 
         {/* Video Export Option for Short Video Template */}

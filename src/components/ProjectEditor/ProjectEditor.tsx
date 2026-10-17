@@ -20,7 +20,7 @@ import {
   revokeManagedObjectURL,
 } from '../../features/safety/AssetSanitizer';
 import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
-import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles, Smartphone } from 'lucide-react';
+import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles, Smartphone, MessageSquare, ShieldCheck, Check } from 'lucide-react';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -561,6 +561,7 @@ const ShortVideoEditorFields: React.FC<TemplateFieldsProps<ShortVideoContent>> =
 };
 
 export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange }) => {
+  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'phone' | 'watermark'>('content');
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isCritical, setIsCritical] = useState(false);
 
@@ -614,13 +615,13 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {warningMessage && (
         <div
           style={{
             backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.15)',
             border: `1px solid ${isCritical ? '#ef4444' : '#f59e0b'}`,
-            borderRadius: 6,
+            borderRadius: 8,
             padding: '8px 12px',
             color: isCritical ? '#fca5a5' : '#fde68a',
             fontSize: 12,
@@ -634,109 +635,158 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
         </div>
       )}
 
-      {/* Platform-Inspired Theme Preset */}
-      <div
-        style={{
-          backgroundColor: 'rgba(99, 102, 241, 0.08)',
-          padding: 12,
-          borderRadius: 8,
-          border: '1px solid rgba(99, 102, 241, 0.25)',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 6,
-            marginBottom: 6,
-            fontSize: 12,
-            fontWeight: 700,
-            color: '#a5b4fc',
-          }}
-        >
-          <Sparkles size={14} /> Platform-Inspired Theme
-        </div>
-        <select
-          value={project.presetStyle || 'default'}
-          onChange={(e) => {
-            const updated = applyPresetToProject(project, e.target.value as PresetStyle);
-            onChange(updated);
-          }}
-          style={{ width: '100%', fontSize: 13 }}
-        >
-          <option value="default">Modern Generic (Default)</option>
-          <option value="whatsapp-style">Emerald Messaging (WhatsApp-Inspired)</option>
-          <option value="facebook-style">Community Feed (Facebook-Inspired)</option>
-          <option value="twitter-style">Microblog Post (X-Inspired)</option>
-          <option value="instagram-style">Visual Story (Instagram-Inspired)</option>
-        </select>
-        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 5, lineHeight: 1.3 }}>
-          {PLATFORM_PRESETS.find((p) => p.id === (project.presetStyle || 'default'))?.tagline}
-        </div>
-      </div>
-
-      {/* Project Title */}
-      <div>
-        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
-          Project Title
+      {/* Mockup Title Header */}
+      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.02)', padding: '10px 12px', borderRadius: 8, border: '1px solid var(--border-color)' }}>
+        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#94a3b8', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          Mockup Title
         </label>
         <input
           type="text"
           value={project.title}
           onChange={handleTitleChange}
-          style={{ width: '100%' }}
+          style={{ width: '100%', fontSize: 13, fontWeight: 600 }}
+          placeholder="e.g. Sample Generic Chat"
         />
       </div>
 
-      {/* Fictional Label Settings */}
-      <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 12, borderRadius: 8, border: '1px solid var(--border-color)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyItems: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 600, color: '#fbbf24' }}>
-            Watermark Enforcement
-          </span>
-          <span style={{ fontSize: 11, color: '#10b981', display: 'flex', alignItems: 'center', gap: 4, marginLeft: 'auto' }}>
-            <Info size={12} /> Always Active
-          </span>
-        </div>
-        <div>
-          <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 4 }}>
-            Watermark Position
-          </label>
-          <select
-            value={project.fictionalLabel.position}
-            onChange={handlePositionChange}
-            style={{ width: '100%' }}
-          >
-            <option value="bottom-right">Bottom Right (Default)</option>
-            <option value="bottom-left">Bottom Left</option>
-            <option value="top-right">Top Right</option>
-            <option value="top-left">Top Left</option>
-          </select>
-        </div>
+      {/* Segmented Navigation Tab Bar */}
+      <div className="tab-group">
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'content' ? 'active' : ''}`}
+          onClick={() => setActiveTab('content')}
+        >
+          <MessageSquare size={13} /> Content
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'style' ? 'active' : ''}`}
+          onClick={() => setActiveTab('style')}
+        >
+          <Sparkles size={13} /> Style
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'phone' ? 'active' : ''}`}
+          onClick={() => setActiveTab('phone')}
+        >
+          <Smartphone size={13} /> Phone Bar
+        </button>
+        <button
+          type="button"
+          className={`tab-btn ${activeTab === 'watermark' ? 'active' : ''}`}
+          onClick={() => setActiveTab('watermark')}
+        >
+          <ShieldCheck size={13} /> Watermark
+        </button>
       </div>
 
-      {/* Device Status Bar & Notifications Controls */}
-      <div
-        style={{
-          backgroundColor: 'rgba(255, 255, 255, 0.03)',
-          padding: 12,
-          borderRadius: 8,
-          border: '1px solid var(--border-color)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 12,
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Smartphone size={14} /> Device Status Bar & Notifications
-          </span>
+      {/* TAB 1: CONTENT (Messages, Post text, Photo, Audio note) */}
+      {activeTab === 'content' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {project.template === 'chat' && (
+            <ChatEditorFields
+              content={project.content as unknown as ChatContent}
+              onUpdate={updateContent}
+              onValidate={handleTextValidation}
+            />
+          )}
+          {project.template === 'feed-post' && (
+            <FeedPostEditorFields
+              content={project.content as unknown as FeedPostContent}
+              onUpdate={updateContent}
+              onValidate={handleTextValidation}
+            />
+          )}
+          {project.template === 'profile-card' && (
+            <ProfileCardEditorFields
+              content={project.content as unknown as ProfileCardContent}
+              onUpdate={updateContent}
+              onValidate={handleTextValidation}
+            />
+          )}
+          {project.template === 'story' && (
+            <StoryEditorFields
+              content={project.content as unknown as StoryContent}
+              onUpdate={updateContent}
+              onValidate={handleTextValidation}
+            />
+          )}
+          {project.template === 'short-video' && (
+            <ShortVideoEditorFields
+              content={project.content as unknown as ShortVideoContent}
+              onUpdate={updateContent}
+              onValidate={handleTextValidation}
+            />
+          )}
         </div>
+      )}
 
-        {/* Status Bar Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+      {/* TAB 2: STYLE (Platform Presets) */}
+      {activeTab === 'style' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Sparkles size={14} /> Choose Platform Style
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {[
+              { id: 'default', label: 'Modern Clean', icon: '✨', desc: 'Minimalist neutral theme' },
+              { id: 'whatsapp-style', label: 'WhatsApp', icon: '💬', desc: 'Emerald chat & voice notes' },
+              { id: 'facebook-style', label: 'Facebook', icon: '👍', desc: 'Community feed & reactions' },
+              { id: 'twitter-style', label: 'X / Twitter', icon: '𝕏', desc: 'Dark microblog & impressions' },
+            ].map((p) => {
+              const isSelected = (project.presetStyle || 'default') === p.id;
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => {
+                    const updated = applyPresetToProject(project, p.id as PresetStyle);
+                    onChange(updated);
+                  }}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    textAlign: 'left',
+                    backgroundColor: isSelected ? 'rgba(99, 102, 241, 0.18)' : 'rgba(255, 255, 255, 0.03)',
+                    border: isSelected ? '1px solid #6366f1' : '1px solid var(--border-color)',
+                    color: '#f8fafc',
+                    cursor: 'pointer',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginBottom: 4 }}>
+                    <span style={{ fontSize: 16 }}>{p.icon}</span>
+                    {isSelected && <Check size={14} color="#a5b4fc" />}
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: 12 }}>{p.label}</div>
+                  <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, lineHeight: 1.3 }}>{p.desc}</div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: PHONE BAR (Status bar & Pop-up notifications) */}
+      {activeTab === 'phone' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Status Bar */}
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              padding: 12,
+              borderRadius: 8,
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            <label style={{ fontSize: 12, fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={project.statusBar?.enabled ?? true}
@@ -758,319 +808,353 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
                   });
                 }}
               />
-              Show Device Status Bar
+              Show Phone Status Bar
             </label>
+
+            {(project.statusBar?.enabled ?? true) && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                    Clock Time
+                  </label>
+                  <input
+                    type="text"
+                    value={project.statusBar?.time || '9:41'}
+                    placeholder="9:41"
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, signalBars: 4, batteryLevel: 94 }),
+                          enabled: true,
+                          time: e.target.value,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                    Network
+                  </label>
+                  <select
+                    value={project.statusBar?.networkType || '5G'}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
+                          enabled: true,
+                          networkType: e.target.value as any,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                  >
+                    <option value="5G">5G</option>
+                    <option value="LTE">LTE</option>
+                    <option value="4G">4G</option>
+                    <option value="Wi-Fi">Wi-Fi only</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                    Signal ({project.statusBar?.signalBars ?? 4} Bars)
+                  </label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={4}
+                    value={project.statusBar?.signalBars ?? 4}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
+                          enabled: true,
+                          signalBars: Number(e.target.value) as 1 | 2 | 3 | 4,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                    Battery ({project.statusBar?.batteryLevel ?? 94}%)
+                  </label>
+                  <input
+                    type="range"
+                    min={1}
+                    max={100}
+                    value={project.statusBar?.batteryLevel ?? 94}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4 }),
+                          enabled: true,
+                          batteryLevel: Number(e.target.value),
+                        },
+                      });
+                    }}
+                    style={{ width: '100%' }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={project.statusBar?.isCharging ?? false}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          statusBar: {
+                            ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
+                            enabled: true,
+                            isCharging: e.target.checked,
+                          },
+                        });
+                      }}
+                    />
+                    Charging (⚡)
+                  </label>
+                  <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={project.statusBar?.showDynamicIsland ?? true}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          statusBar: {
+                            ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
+                            enabled: true,
+                            showDynamicIsland: e.target.checked,
+                          },
+                        });
+                      }}
+                    />
+                    Dynamic Island
+                  </label>
+                </div>
+              </div>
+            )}
           </div>
 
-          {(project.statusBar?.enabled ?? true) && (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
-                  Status Time
-                </label>
-                <input
-                  type="text"
-                  value={project.statusBar?.time || '9:41'}
-                  placeholder="9:41"
-                  onChange={(e) => {
-                    onChange({
-                      ...project,
-                      statusBar: {
-                        ...(project.statusBar || { enabled: true, signalBars: 4, batteryLevel: 94 }),
-                        enabled: true,
-                        time: e.target.value,
-                      },
-                    });
-                  }}
-                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                />
-              </div>
+          {/* Pop-up Notification */}
+          <div
+            style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.03)',
+              padding: 12,
+              borderRadius: 8,
+              border: '1px solid var(--border-color)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 8,
+            }}
+          >
+            <label style={{ fontSize: 12, fontWeight: 700, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={project.notificationBanner?.enabled ?? false}
+                onChange={(e) => {
+                  onChange({
+                    ...project,
+                    notificationBanner: {
+                      ...(project.notificationBanner || {
+                        appName: 'Messages',
+                        timeAgo: 'now',
+                        title: 'Alex Parker',
+                        message: 'Hey, have you checked the new design mockup?',
+                        avatarEmoji: '💬',
+                      }),
+                      enabled: e.target.checked,
+                    },
+                  });
+                }}
+              />
+              Show Pop-up Notification
+            </label>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
-                  Network
-                </label>
-                <select
-                  value={project.statusBar?.networkType || '5G'}
-                  onChange={(e) => {
-                    onChange({
-                      ...project,
-                      statusBar: {
-                        ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
-                        enabled: true,
-                        networkType: e.target.value as any,
-                      },
-                    });
-                  }}
-                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                >
-                  <option value="5G">5G</option>
-                  <option value="LTE">LTE</option>
-                  <option value="4G">4G</option>
-                  <option value="Wi-Fi">Wi-Fi only</option>
-                </select>
-              </div>
+            {(project.notificationBanner?.enabled ?? false) && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                      App Name
+                    </label>
+                    <input
+                      type="text"
+                      value={project.notificationBanner?.appName || 'Messages'}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          notificationBanner: {
+                            ...(project.notificationBanner || { enabled: true }),
+                            enabled: true,
+                            appName: e.target.value,
+                          },
+                        });
+                      }}
+                      style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                      Time Ago
+                    </label>
+                    <input
+                      type="text"
+                      value={project.notificationBanner?.timeAgo || 'now'}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          notificationBanner: {
+                            ...(project.notificationBanner || { enabled: true }),
+                            enabled: true,
+                            timeAgo: e.target.value,
+                          },
+                        });
+                      }}
+                      style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                    />
+                  </div>
+                </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
-                  Cellular Signal ({project.statusBar?.signalBars ?? 4} Bars)
-                </label>
-                <input
-                  type="range"
-                  min={1}
-                  max={4}
-                  value={project.statusBar?.signalBars ?? 4}
-                  onChange={(e) => {
-                    onChange({
-                      ...project,
-                      statusBar: {
-                        ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
-                        enabled: true,
-                        signalBars: Number(e.target.value) as 1 | 2 | 3 | 4,
-                      },
-                    });
-                  }}
-                  style={{ width: '100%' }}
-                />
-              </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr', gap: 8 }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                      Icon
+                    </label>
+                    <input
+                      type="text"
+                      value={project.notificationBanner?.avatarEmoji || '💬'}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          notificationBanner: {
+                            ...(project.notificationBanner || { enabled: true }),
+                            enabled: true,
+                            avatarEmoji: e.target.value,
+                          },
+                        });
+                      }}
+                      style={{ width: '100%', textAlign: 'center', fontSize: 14, padding: '4px' }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                      Sender / Title
+                    </label>
+                    <input
+                      type="text"
+                      value={project.notificationBanner?.title || 'Alex Parker'}
+                      onChange={(e) => {
+                        onChange({
+                          ...project,
+                          notificationBanner: {
+                            ...(project.notificationBanner || { enabled: true }),
+                            enabled: true,
+                            title: e.target.value,
+                          },
+                        });
+                      }}
+                      style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                    />
+                  </div>
+                </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
-                  Battery ({project.statusBar?.batteryLevel ?? 94}%)
-                </label>
-                <input
-                  type="range"
-                  min={1}
-                  max={100}
-                  value={project.statusBar?.batteryLevel ?? 94}
-                  onChange={(e) => {
-                    onChange({
-                      ...project,
-                      statusBar: {
-                        ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4 }),
-                        enabled: true,
-                        batteryLevel: Number(e.target.value),
-                      },
-                    });
-                  }}
-                  style={{ width: '100%' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, gridColumn: 'span 2' }}>
-                <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                    Message Preview
+                  </label>
                   <input
-                    type="checkbox"
-                    checked={project.statusBar?.isCharging ?? false}
+                    type="text"
+                    value={project.notificationBanner?.message || ''}
+                    placeholder="Type preview message..."
                     onChange={(e) => {
                       onChange({
                         ...project,
-                        statusBar: {
-                          ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
                           enabled: true,
-                          isCharging: e.target.checked,
+                          message: e.target.value,
                         },
                       });
                     }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
                   />
-                  Charging (⚡)
-                </label>
-                <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', marginLeft: 12 }}>
-                  <input
-                    type="checkbox"
-                    checked={project.statusBar?.showDynamicIsland ?? true}
-                    onChange={(e) => {
-                      onChange({
-                        ...project,
-                        statusBar: {
-                          ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
-                          enabled: true,
-                          showDynamicIsland: e.target.checked,
-                        },
-                      });
-                    }}
-                  />
-                  Dynamic Island
-                </label>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
+      )}
 
-        {/* Notification Banner Controls */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
-          <label style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-            <input
-              type="checkbox"
-              checked={project.notificationBanner?.enabled ?? false}
-              onChange={(e) => {
-                onChange({
-                  ...project,
-                  notificationBanner: {
-                    ...(project.notificationBanner || {
-                      appName: 'Messages',
-                      timeAgo: 'now',
-                      title: 'Alex Parker',
-                      message: 'Hey, have you checked the new design mockup?',
-                      avatarEmoji: '💬',
-                    }),
-                    enabled: e.target.checked,
-                  },
-                });
-              }}
-            />
-            Show Floating Push Notification
-          </label>
+      {/* TAB 4: WATERMARK (Position & Ethics) */}
+      {activeTab === 'watermark' && (
+        <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)', padding: 12, borderRadius: 8, border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <ShieldCheck size={14} /> Watermark Placement
+            </span>
+            <span style={{ fontSize: 11, color: '#10b981', display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Info size={12} /> Always Active
+            </span>
+          </div>
 
-          {(project.notificationBanner?.enabled ?? false) && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
-                    App Name
-                  </label>
-                  <input
-                    type="text"
-                    value={project.notificationBanner?.appName || 'Messages'}
-                    onChange={(e) => {
+          <div>
+            <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 6 }}>
+              Choose Corner on Mockup
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+              {[
+                { pos: 'top-left', label: 'Top Left' },
+                { pos: 'top-right', label: 'Top Right' },
+                { pos: 'bottom-left', label: 'Bottom Left' },
+                { pos: 'bottom-right', label: 'Bottom Right (Default)' },
+              ].map((c) => {
+                const isSelected = project.fictionalLabel.position === c.pos;
+                return (
+                  <button
+                    key={c.pos}
+                    type="button"
+                    onClick={() => {
                       onChange({
                         ...project,
-                        notificationBanner: {
-                          ...(project.notificationBanner || { enabled: true }),
-                          enabled: true,
-                          appName: e.target.value,
+                        fictionalLabel: {
+                          ...project.fictionalLabel,
+                          position: c.pos as WatermarkPosition,
                         },
                       });
                     }}
-                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
-                    Time Ago
-                  </label>
-                  <input
-                    type="text"
-                    value={project.notificationBanner?.timeAgo || 'now'}
-                    onChange={(e) => {
-                      onChange({
-                        ...project,
-                        notificationBanner: {
-                          ...(project.notificationBanner || { enabled: true }),
-                          enabled: true,
-                          timeAgo: e.target.value,
-                        },
-                      });
+                    style={{
+                      padding: '8px 10px',
+                      borderRadius: 6,
+                      fontSize: 11,
+                      fontWeight: 600,
+                      backgroundColor: isSelected ? 'rgba(251, 191, 36, 0.15)' : 'rgba(255,255,255,0.03)',
+                      border: isSelected ? '1px solid #fbbf24' : '1px solid var(--border-color)',
+                      color: isSelected ? '#fbbf24' : '#cbd5e1',
+                      cursor: 'pointer',
                     }}
-                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                  />
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr', gap: 8 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
-                    Icon
-                  </label>
-                  <input
-                    type="text"
-                    value={project.notificationBanner?.avatarEmoji || '💬'}
-                    onChange={(e) => {
-                      onChange({
-                        ...project,
-                        notificationBanner: {
-                          ...(project.notificationBanner || { enabled: true }),
-                          enabled: true,
-                          avatarEmoji: e.target.value,
-                        },
-                      });
-                    }}
-                    style={{ width: '100%', textAlign: 'center', fontSize: 14, padding: '4px' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
-                    Notification Title / Sender
-                  </label>
-                  <input
-                    type="text"
-                    value={project.notificationBanner?.title || 'Alex Parker'}
-                    onChange={(e) => {
-                      onChange({
-                        ...project,
-                        notificationBanner: {
-                          ...(project.notificationBanner || { enabled: true }),
-                          enabled: true,
-                          title: e.target.value,
-                        },
-                      });
-                    }}
-                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
-                  Notification Message
-                </label>
-                <input
-                  type="text"
-                  value={project.notificationBanner?.message || ''}
-                  placeholder="Hey, have you checked the new design mockup?"
-                  onChange={(e) => {
-                    onChange({
-                      ...project,
-                      notificationBanner: {
-                        ...(project.notificationBanner || { enabled: true }),
-                        enabled: true,
-                        message: e.target.value,
-                      },
-                    });
-                  }}
-                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
-                />
-              </div>
+                  >
+                    {c.label}
+                  </button>
+                );
+              })}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
 
-      {/* Dynamic Template Fields */}
-      {project.template === 'chat' && (
-        <ChatEditorFields
-          content={project.content as unknown as ChatContent}
-          onUpdate={updateContent}
-          onValidate={handleTextValidation}
-        />
-      )}
-      {project.template === 'feed-post' && (
-        <FeedPostEditorFields
-          content={project.content as unknown as FeedPostContent}
-          onUpdate={updateContent}
-          onValidate={handleTextValidation}
-        />
-      )}
-      {project.template === 'profile-card' && (
-        <ProfileCardEditorFields
-          content={project.content as unknown as ProfileCardContent}
-          onUpdate={updateContent}
-          onValidate={handleTextValidation}
-        />
-      )}
-      {project.template === 'story' && (
-        <StoryEditorFields
-          content={project.content as unknown as StoryContent}
-          onUpdate={updateContent}
-          onValidate={handleTextValidation}
-        />
-      )}
-      {project.template === 'short-video' && (
-        <ShortVideoEditorFields
-          content={project.content as unknown as ShortVideoContent}
-          onUpdate={updateContent}
-          onValidate={handleTextValidation}
-        />
+          <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4, backgroundColor: 'rgba(0,0,0,0.2)', padding: 8, borderRadius: 6 }}>
+            The <strong>FICTIONAL MOCKUP</strong> watermark protects your prototypes from being misused as real evidence or fraud.
+          </div>
+        </div>
       )}
     </div>
   );
