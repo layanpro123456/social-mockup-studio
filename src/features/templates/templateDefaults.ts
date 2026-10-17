@@ -61,6 +61,24 @@ export function createDefaultProject(template: TemplateKind): MockupProject {
       enabled: true,
       position: 'bottom-right',
     },
+    statusBar: {
+      enabled: true,
+      time: '9:41',
+      networkType: '5G',
+      signalBars: 4,
+      wifiBars: 3,
+      batteryLevel: 94,
+      isCharging: false,
+      showDynamicIsland: true,
+    },
+    notificationBanner: {
+      enabled: false,
+      appName: 'Messages',
+      timeAgo: 'now',
+      title: 'Alex Parker',
+      message: 'Hey, have you checked the new design prototype?',
+      avatarEmoji: '💬',
+    },
     content: {},
   };
 

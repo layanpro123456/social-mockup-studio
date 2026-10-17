@@ -26,7 +26,14 @@ import {
   MoreHorizontal,
   ArrowLeft,
   Lock,
+  Phone,
+  Video,
+  Bell,
+  Mail,
+  Search,
 } from 'lucide-react';
+import { DeviceStatusBar } from '../DeviceStatusBar/DeviceStatusBar';
+import { NotificationBanner } from '../NotificationBanner/NotificationBanner';
 
 interface PreviewCanvasProps {
   project: MockupProject;
@@ -72,18 +79,39 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
             }}
           >
+            {/* Emerald Device Status Bar */}
+            <DeviceStatusBar
+              config={project.statusBar}
+              theme="dark"
+              style={{ backgroundColor: '#008069' }}
+            />
+
             {/* Emerald Header */}
             <div
               style={{
-                padding: '10px 14px',
+                padding: '8px 14px 10px',
                 backgroundColor: '#008069',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
-                gap: 10,
+                gap: 8,
               }}
             >
-              <ArrowLeft size={18} style={{ cursor: 'pointer' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'pointer' }}>
+                <ArrowLeft size={18} />
+                <span
+                  style={{
+                    backgroundColor: '#25d366',
+                    color: '#111b21',
+                    borderRadius: 10,
+                    padding: '0 5px',
+                    fontSize: 10,
+                    fontWeight: 700,
+                  }}
+                >
+                  3
+                </span>
+              </div>
               <div
                 style={{
                   width: 36,
@@ -106,8 +134,15 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                 </div>
                 <div style={{ fontSize: 11, color: '#e0f2fe' }}>online (fictional prototype)</div>
               </div>
-              <MoreHorizontal size={18} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                <Video size={17} style={{ cursor: 'pointer', opacity: 0.95 }} />
+                <Phone size={16} style={{ cursor: 'pointer', opacity: 0.95 }} />
+                <MoreHorizontal size={18} style={{ cursor: 'pointer' }} />
+              </div>
             </div>
+
+            {/* Notification Banner Overlay if enabled */}
+            <NotificationBanner config={project.notificationBanner} />
 
             {/* Encrypted Notice Banner */}
             <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'center' }}>
@@ -299,12 +334,21 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             display: 'flex',
             flexDirection: 'column',
             position: 'relative',
+            borderRadius: 14,
+            overflow: 'hidden',
           }}
         >
+          {/* Top Device Status Bar */}
+          <DeviceStatusBar
+            config={project.statusBar}
+            theme="dark"
+            style={{ backgroundColor: theme.background || '#0f172a' }}
+          />
+
           {/* Chat Header */}
           <div
             style={{
-              padding: '14px 16px',
+              padding: '12px 16px',
               backgroundColor: theme.background || '#0f172a',
               borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
               display: 'flex',
@@ -344,6 +388,9 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               </div>
             </div>
           </div>
+
+          {/* Notification Banner Overlay if enabled */}
+          <NotificationBanner config={project.notificationBanner} />
 
           {/* Message Thread */}
           <div style={{ flex: 1, padding: 16, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -444,16 +491,87 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               width: 440,
               backgroundColor: '#ffffff',
               color: '#050505',
-              borderRadius: 10,
-              padding: '14px 16px',
+              borderRadius: 14,
+              overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
               position: 'relative',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
               border: '1px solid #ced0d4',
             }}
           >
+            {/* Top Device Status Bar */}
+            <DeviceStatusBar
+              config={project.statusBar}
+              theme="light"
+              style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #f0f2f5' }}
+            />
+
+            {/* Facebook App Navigation Bar */}
+            <div
+              style={{
+                padding: '8px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                borderBottom: '1px solid #f0f2f5',
+              }}
+            >
+              <div style={{ fontWeight: 800, fontSize: 18, color: '#1877f2', letterSpacing: -0.5 }}>
+                community
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    backgroundColor: '#f0f2f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Search size={16} color="#050505" />
+                </div>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    backgroundColor: '#f0f2f5',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Bell size={16} color="#050505" />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      top: -2,
+                      right: -2,
+                      backgroundColor: '#e41e3f',
+                      color: '#ffffff',
+                      borderRadius: 10,
+                      padding: '0 4px',
+                      fontSize: 9,
+                      fontWeight: 700,
+                    }}
+                  >
+                    3
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Notification Banner Overlay if enabled */}
+            <NotificationBanner config={project.notificationBanner} />
+
+            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {/* Header */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -613,11 +731,11 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   <div style={{ fontSize: 11, color: '#65676b', marginTop: 3, display: 'flex', gap: 10 }}>
                     <span style={{ fontWeight: 600 }}>Like</span>
                     <span style={{ fontWeight: 600 }}>Reply</span>
-                    <span>1h</span>
                   </div>
                 </div>
               </div>
             )}
+            </div>
 
             {renderWatermark()}
           </div>
@@ -632,16 +750,26 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               width: 440,
               backgroundColor: '#000000',
               color: '#e7e9ea',
-              borderRadius: 14,
-              padding: '16px 20px',
+              borderRadius: 16,
+              overflow: 'hidden',
               display: 'flex',
               flexDirection: 'column',
-              gap: 12,
               position: 'relative',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
               border: '1px solid #2f3336',
             }}
           >
+            {/* Top Device Status Bar */}
+            <DeviceStatusBar
+              config={project.statusBar}
+              theme="dark"
+              style={{ backgroundColor: '#000000' }}
+            />
+
+            {/* Notification Banner Overlay if enabled */}
+            <NotificationBanner config={project.notificationBanner} />
+
+            <div style={{ padding: '14px 18px', display: 'flex', flexDirection: 'column', gap: 12 }}>
             {/* Author Row */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -729,6 +857,58 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                 <Share2 size={17} />
               </div>
             </div>
+            </div>
+
+            {/* Microblog Bottom Navigation Dock with Notification Indicator */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                alignItems: 'center',
+                padding: '10px 0 8px',
+                borderTop: '1px solid #2f3336',
+                color: '#71767b',
+              }}
+            >
+              <div style={{ cursor: 'pointer', color: '#1d9bf0' }}>
+                <span style={{ fontSize: 16 }}>🏠</span>
+              </div>
+              <div style={{ cursor: 'pointer' }}>
+                <Search size={18} />
+              </div>
+              <div style={{ position: 'relative', cursor: 'pointer' }}>
+                <Bell size={18} />
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -1,
+                    right: -1,
+                    width: 7,
+                    height: 7,
+                    borderRadius: '50%',
+                    backgroundColor: '#1d9bf0',
+                  }}
+                />
+              </div>
+              <div style={{ position: 'relative', cursor: 'pointer' }}>
+                <Mail size={18} />
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: -4,
+                    right: -6,
+                    backgroundColor: '#1d9bf0',
+                    color: '#ffffff',
+                    borderRadius: 10,
+                    padding: '0 4px',
+                    fontSize: 8,
+                    fontWeight: 700,
+                  }}
+                >
+                  2
+                </span>
+              </div>
+            </div>
 
             {renderWatermark()}
           </div>
@@ -742,14 +922,24 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             width: 440,
             backgroundColor: theme.cardBackground || '#1e293b',
             color: theme.textColor || '#f8fafc',
-            borderRadius: 12,
-            padding: 18,
+            borderRadius: 14,
+            overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            gap: 14,
             position: 'relative',
           }}
         >
+          {/* Top Device Status Bar */}
+          <DeviceStatusBar
+            config={project.statusBar}
+            theme="dark"
+            style={{ backgroundColor: theme.background || '#0f172a' }}
+          />
+
+          {/* Notification Banner Overlay if enabled */}
+          <NotificationBanner config={project.notificationBanner} />
+
+          <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
           {/* Post Header */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div
@@ -847,6 +1037,7 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               ))}
             </div>
           )}
+          </div>
 
           {renderWatermark()}
         </div>
@@ -868,6 +1059,16 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             position: 'relative',
           }}
         >
+          {/* Top Device Status Bar */}
+          <DeviceStatusBar
+            config={project.statusBar}
+            theme="dark"
+            style={{ backgroundColor: theme.accent || '#3b82f6' }}
+          />
+
+          {/* Notification Banner Overlay if enabled */}
+          <NotificationBanner config={project.notificationBanner} />
+
           <div style={{ height: 80, backgroundColor: theme.accent || '#3b82f6', opacity: 0.8 }} />
           <div style={{ padding: '0 20px 24px 20px', marginTop: -40 }}>
             <div
@@ -951,6 +1152,16 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
           }}
         >
+          {/* Top Device Status Bar */}
+          <DeviceStatusBar
+            config={project.statusBar}
+            theme="dark"
+            style={{ margin: '-10px -10px 4px' }}
+          />
+
+          {/* Notification Banner Overlay if enabled */}
+          <NotificationBanner config={project.notificationBanner} style={{ margin: '0 0 10px' }} />
+
           {/* Top Progress Dash Bars */}
           <div>
             <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
@@ -1135,8 +1346,18 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             </div>
           </div>
 
+          {/* Top Device Status Bar */}
+          <DeviceStatusBar
+            config={project.statusBar}
+            theme="dark"
+            style={{ position: 'relative', zIndex: 12, backgroundColor: 'rgba(0,0,0,0.35)' }}
+          />
+
+          {/* Notification Banner Overlay if enabled */}
+          <NotificationBanner config={project.notificationBanner} style={{ position: 'relative', zIndex: 12 }} />
+
           {/* Top Frame Counter Badge */}
-          <div style={{ position: 'relative', zIndex: 10, padding: 16 }}>
+          <div style={{ position: 'relative', zIndex: 10, padding: '8px 16px' }}>
             <span
               style={{
                 backgroundColor: 'rgba(0, 0, 0, 0.6)',

@@ -128,6 +128,26 @@ export interface ShortVideoFrame {
   content: Record<string, unknown>;
 }
 
+export interface DeviceStatusBarConfig {
+  enabled: boolean;
+  time: string;
+  networkType?: '5G' | 'LTE' | '4G' | 'Wi-Fi';
+  signalBars?: 1 | 2 | 3 | 4;
+  wifiBars?: 1 | 2 | 3;
+  batteryLevel?: number;
+  isCharging?: boolean;
+  showDynamicIsland?: boolean;
+}
+
+export interface NotificationBannerConfig {
+  enabled: boolean;
+  appName: string;
+  timeAgo: string;
+  title: string;
+  message: string;
+  avatarEmoji?: string;
+}
+
 export interface MockupProject {
   schemaVersion: 1;
   id: string;
@@ -139,6 +159,9 @@ export interface MockupProject {
   updatedAt: string;
   theme: MockupTheme;
   fictionalLabel: FictionalLabel;
+  statusBar?: DeviceStatusBarConfig;
+  notificationBanner?: NotificationBannerConfig;
   content: Record<string, unknown>;
   frames?: ShortVideoFrame[];
 }
+

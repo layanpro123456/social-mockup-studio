@@ -20,7 +20,7 @@ import {
   revokeManagedObjectURL,
 } from '../../features/safety/AssetSanitizer';
 import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
-import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles } from 'lucide-react';
+import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles, Smartphone } from 'lucide-react';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -712,6 +712,327 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
             <option value="top-right">Top Right</option>
             <option value="top-left">Top Left</option>
           </select>
+        </div>
+      </div>
+
+      {/* Device Status Bar & Notifications Controls */}
+      <div
+        style={{
+          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+          padding: 12,
+          borderRadius: 8,
+          border: '1px solid var(--border-color)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Smartphone size={14} /> Device Status Bar & Notifications
+          </span>
+        </div>
+
+        {/* Status Bar Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={project.statusBar?.enabled ?? true}
+                onChange={(e) => {
+                  onChange({
+                    ...project,
+                    statusBar: {
+                      ...(project.statusBar || {
+                        time: '9:41',
+                        signalBars: 4,
+                        networkType: '5G',
+                        wifiBars: 3,
+                        batteryLevel: 94,
+                        isCharging: false,
+                        showDynamicIsland: true,
+                      }),
+                      enabled: e.target.checked,
+                    },
+                  });
+                }}
+              />
+              Show Device Status Bar
+            </label>
+          </div>
+
+          {(project.statusBar?.enabled ?? true) && (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                  Status Time
+                </label>
+                <input
+                  type="text"
+                  value={project.statusBar?.time || '9:41'}
+                  placeholder="9:41"
+                  onChange={(e) => {
+                    onChange({
+                      ...project,
+                      statusBar: {
+                        ...(project.statusBar || { enabled: true, signalBars: 4, batteryLevel: 94 }),
+                        enabled: true,
+                        time: e.target.value,
+                      },
+                    });
+                  }}
+                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                  Network
+                </label>
+                <select
+                  value={project.statusBar?.networkType || '5G'}
+                  onChange={(e) => {
+                    onChange({
+                      ...project,
+                      statusBar: {
+                        ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
+                        enabled: true,
+                        networkType: e.target.value as any,
+                      },
+                    });
+                  }}
+                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                >
+                  <option value="5G">5G</option>
+                  <option value="LTE">LTE</option>
+                  <option value="4G">4G</option>
+                  <option value="Wi-Fi">Wi-Fi only</option>
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                  Cellular Signal ({project.statusBar?.signalBars ?? 4} Bars)
+                </label>
+                <input
+                  type="range"
+                  min={1}
+                  max={4}
+                  value={project.statusBar?.signalBars ?? 4}
+                  onChange={(e) => {
+                    onChange({
+                      ...project,
+                      statusBar: {
+                        ...(project.statusBar || { enabled: true, time: '9:41', batteryLevel: 94 }),
+                        enabled: true,
+                        signalBars: Number(e.target.value) as 1 | 2 | 3 | 4,
+                      },
+                    });
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 3 }}>
+                  Battery ({project.statusBar?.batteryLevel ?? 94}%)
+                </label>
+                <input
+                  type="range"
+                  min={1}
+                  max={100}
+                  value={project.statusBar?.batteryLevel ?? 94}
+                  onChange={(e) => {
+                    onChange({
+                      ...project,
+                      statusBar: {
+                        ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4 }),
+                        enabled: true,
+                        batteryLevel: Number(e.target.value),
+                      },
+                    });
+                  }}
+                  style={{ width: '100%' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, gridColumn: 'span 2' }}>
+                <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={project.statusBar?.isCharging ?? false}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
+                          enabled: true,
+                          isCharging: e.target.checked,
+                        },
+                      });
+                    }}
+                  />
+                  Charging (⚡)
+                </label>
+                <label style={{ fontSize: 11, color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', marginLeft: 12 }}>
+                  <input
+                    type="checkbox"
+                    checked={project.statusBar?.showDynamicIsland ?? true}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        statusBar: {
+                          ...(project.statusBar || { enabled: true, time: '9:41', signalBars: 4, batteryLevel: 94 }),
+                          enabled: true,
+                          showDynamicIsland: e.target.checked,
+                        },
+                      });
+                    }}
+                  />
+                  Dynamic Island
+                </label>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Notification Banner Controls */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 10 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: '#f1f5f9', display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={project.notificationBanner?.enabled ?? false}
+              onChange={(e) => {
+                onChange({
+                  ...project,
+                  notificationBanner: {
+                    ...(project.notificationBanner || {
+                      appName: 'Messages',
+                      timeAgo: 'now',
+                      title: 'Alex Parker',
+                      message: 'Hey, have you checked the new design mockup?',
+                      avatarEmoji: '💬',
+                    }),
+                    enabled: e.target.checked,
+                  },
+                });
+              }}
+            />
+            Show Floating Push Notification
+          </label>
+
+          {(project.notificationBanner?.enabled ?? false) && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, padding: '8px 10px', backgroundColor: 'rgba(0,0,0,0.2)', borderRadius: 6 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                    App Name
+                  </label>
+                  <input
+                    type="text"
+                    value={project.notificationBanner?.appName || 'Messages'}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
+                          enabled: true,
+                          appName: e.target.value,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                    Time Ago
+                  </label>
+                  <input
+                    type="text"
+                    value={project.notificationBanner?.timeAgo || 'now'}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
+                          enabled: true,
+                          timeAgo: e.target.value,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '40px 1fr', gap: 8 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                    Icon
+                  </label>
+                  <input
+                    type="text"
+                    value={project.notificationBanner?.avatarEmoji || '💬'}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
+                          enabled: true,
+                          avatarEmoji: e.target.value,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', textAlign: 'center', fontSize: 14, padding: '4px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                    Notification Title / Sender
+                  </label>
+                  <input
+                    type="text"
+                    value={project.notificationBanner?.title || 'Alex Parker'}
+                    onChange={(e) => {
+                      onChange({
+                        ...project,
+                        notificationBanner: {
+                          ...(project.notificationBanner || { enabled: true }),
+                          enabled: true,
+                          title: e.target.value,
+                        },
+                      });
+                    }}
+                    style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 2 }}>
+                  Notification Message
+                </label>
+                <input
+                  type="text"
+                  value={project.notificationBanner?.message || ''}
+                  placeholder="Hey, have you checked the new design mockup?"
+                  onChange={(e) => {
+                    onChange({
+                      ...project,
+                      notificationBanner: {
+                        ...(project.notificationBanner || { enabled: true }),
+                        enabled: true,
+                        message: e.target.value,
+                      },
+                    });
+                  }}
+                  style={{ width: '100%', fontSize: 12, padding: '4px 8px' }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
