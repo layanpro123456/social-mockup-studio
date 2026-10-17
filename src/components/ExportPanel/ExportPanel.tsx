@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { MockupProject } from '../../models/types';
 import { toPng, toJpeg } from 'html-to-image';
 import { isMediaRecorderSupported } from '../../services/VideoExportService';
+import { classifyDeceptiveContent, MANDATORY_WATERMARK_TEXT } from '../../features/safety/SafetyGuard';
 import {
   Download,
   ShieldCheck,
@@ -9,6 +10,7 @@ import {
   AlertCircle,
   Video,
   XCircle,
+  ShieldAlert,
 } from 'lucide-react';
 
 interface ExportPanelProps {
@@ -18,6 +20,20 @@ interface ExportPanelProps {
     onProgress: (p: { percent: number; message: string }) => void,
     isCancelled: () => boolean
   ) => Promise<Blob>;
+}
+
+export function scanProjectForCriticalFraud(project: MockupProject): {
+  isBlocked: boolean;
+  blockedTerms: string[];
+} {
+  const allText = `${project.title} ${JSON.stringify(project.content)} ${JSON.stringify(
+    project.frames || []
+  )}`;
+  const check = classifyDeceptiveContent(allText);
+  return {
+    isBlocked: check.isBlocked,
+    blockedTerms: check.criticalTerms,
+  };
 }
 
 export const ExportPanel: React.FC<ExportPanelProps> = ({
@@ -33,15 +49,27 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const cancelExportRef = useRef(false);
 
   const isVideoSupported = isMediaRecorderSupported();
+  const fraudCheck = scanProjectForCriticalFraud(project);
 
   const handleExportImage = async () => {
+    // 1. Critical Fraud Pre-Export Gate
+    if (fraudCheck.isBlocked) {
+      setIsError(true);
+      setStatusMessage(
+        `Security Block: Export prohibited. Detected deceptive keyword(s): "${fraudCheck.blockedTerms.join(
+          ', '
+        )}". Fictional mockups cannot simulate financial transfers, OTP codes, or official warrants.`
+      );
+      return;
+    }
+
     if (!canvasRef.current) {
       setIsError(true);
       setStatusMessage('Canvas element not found for export.');
       return;
     }
 
-    // Verify watermark exists in DOM
+    // 2. Verify watermark element exists in DOM and is visible
     const watermark = canvasRef.current.querySelector('[data-testid="fictional-mockup-watermark"]');
     if (!watermark) {
       setIsError(true);
@@ -66,7 +94,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       link.href = dataUrl;
       link.click();
 
-      setStatusMessage('Export complete with fictional label.');
+      setStatusMessage('Export complete with verified fictional label.');
     } catch (err) {
       setIsError(true);
       setStatusMessage(`Export failed: ${(err as Error).message}`);
@@ -76,6 +104,17 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   };
 
   const handleExportVideo = async () => {
+    // 1. Critical Fraud Pre-Export Gate
+    if (fraudCheck.isBlocked) {
+      setIsError(true);
+      setStatusMessage(
+        `Security Block: Export prohibited. Detected deceptive keyword(s): "${fraudCheck.blockedTerms.join(
+          ', '
+        )}".`
+      );
+      return;
+    }
+
     if (!onExportVideo) return;
     cancelExportRef.current = false;
     setIsExporting(true);
@@ -125,6 +164,31 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {/* Critical Fraud Warning Banner */}
+        {fraudCheck.isBlocked && (
+          <div
+            style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.2)',
+              border: '1px solid #ef4444',
+              borderRadius: 8,
+              padding: 10,
+              fontSize: 12,
+              color: '#fca5a5',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 700, color: '#f87171' }}>
+              <ShieldAlert size={16} /> Security Export Gate Blocked
+            </div>
+            <div style={{ fontSize: 11, lineHeight: 1.4 }}>
+              Prohibited content detected ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive phrases
+              to enable export.
+            </div>
+          </div>
+        )}
+
         <div>
           <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
             Image Format
@@ -167,8 +231,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             <ShieldCheck size={16} /> Trust & Safety Verified
           </div>
           <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-            Visible <strong>FICTIONAL MOCKUP</strong> watermark will be rendered into all exported images
-            and video frames.
+            Visible <strong>{MANDATORY_WATERMARK_TEXT}</strong> watermark will be rendered into all exported
+            images and video frames.
           </div>
         </div>
 
@@ -176,9 +240,15 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         <button
           type="button"
           onClick={handleExportImage}
-          disabled={isExporting}
+          disabled={isExporting || fraudCheck.isBlocked}
           className="btn-primary"
-          style={{ width: '100%', justifyContent: 'center', padding: '10px 16px' }}
+          style={{
+            width: '100%',
+            justifyContent: 'center',
+            padding: '10px 16px',
+            opacity: fraudCheck.isBlocked ? 0.5 : 1,
+            cursor: fraudCheck.isBlocked ? 'not-allowed' : 'pointer',
+          }}
         >
           <Download size={16} /> Export Image ({format.toUpperCase()})
         </button>
@@ -194,7 +264,16 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               gap: 8,
             }}
           >
-            <div style={{ fontSize: 12, fontWeight: 600, color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 600,
+                color: '#38bdf8',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
               <Video size={14} /> Short Video Clip Export
             </div>
 
@@ -202,7 +281,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
               <button
                 type="button"
                 onClick={handleExportVideo}
-                disabled={isExporting}
+                disabled={isExporting || fraudCheck.isBlocked}
                 className="btn-secondary"
                 style={{
                   width: '100%',
@@ -211,12 +290,22 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
                   backgroundColor: 'rgba(56, 189, 248, 0.15)',
                   borderColor: '#0284c7',
                   color: '#e0f2fe',
+                  opacity: fraudCheck.isBlocked ? 0.5 : 1,
+                  cursor: fraudCheck.isBlocked ? 'not-allowed' : 'pointer',
                 }}
               >
                 <Video size={16} /> Export Animated WebM
               </button>
             ) : (
-              <div style={{ fontSize: 11, color: '#f59e0b', padding: '6px 10px', backgroundColor: 'rgba(245, 158, 11, 0.1)', borderRadius: 6 }}>
+              <div
+                style={{
+                  fontSize: 11,
+                  color: '#f59e0b',
+                  padding: '6px 10px',
+                  backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                  borderRadius: 6,
+                }}
+              >
                 WebM recording not supported on this browser engine.
               </div>
             )}

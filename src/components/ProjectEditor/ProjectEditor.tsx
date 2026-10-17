@@ -8,8 +8,17 @@ import {
   StoryContent,
   ShortVideoContent,
 } from '../../models/types';
-import { checkDisallowedPatterns, sanitizeText } from '../../features/safety/SafetyGuard';
-import { AlertTriangle, Plus, Trash2, Info } from 'lucide-react';
+import {
+  checkDisallowedPatterns,
+  classifyDeceptiveContent,
+  sanitizeText,
+} from '../../features/safety/SafetyGuard';
+import {
+  validateImageFile,
+  createManagedObjectURL,
+  revokeManagedObjectURL,
+} from '../../features/safety/AssetSanitizer';
+import { AlertTriangle, Plus, Trash2, Info, ShieldAlert } from 'lucide-react';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -155,6 +164,37 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
   onUpdate,
   onValidate,
 }) => {
+  const [imageError, setImageError] = useState<string | null>(null);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const validation = validateImageFile(file);
+    if (!validation.isValid) {
+      setImageError(validation.error || 'Invalid image file.');
+      e.target.value = '';
+      return;
+    }
+
+    setImageError(null);
+    if (content.imageUrl && content.imageUrl.startsWith('blob:')) {
+      revokeManagedObjectURL(content.imageUrl);
+    }
+
+    const objectUrl = createManagedObjectURL(file);
+    onUpdate({ imageUrl: objectUrl });
+    e.target.value = '';
+  };
+
+  const handleRemoveImage = () => {
+    if (content.imageUrl && content.imageUrl.startsWith('blob:')) {
+      revokeManagedObjectURL(content.imageUrl);
+    }
+    onUpdate({ imageUrl: '' });
+    setImageError(null);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div>
@@ -166,7 +206,7 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
           value={content.displayName || ''}
           onChange={(e) => {
             onValidate(e.target.value);
-            onUpdate({ displayName: sanitizeText(e.target.value) });
+            onUpdate({ displayName: sanitizeText(e.target.value, 60) });
           }}
           style={{ width: '100%' }}
         />
@@ -180,7 +220,7 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
           value={content.handle || ''}
           onChange={(e) => {
             onValidate(e.target.value);
-            onUpdate({ handle: sanitizeText(e.target.value) });
+            onUpdate({ handle: sanitizeText(e.target.value, 60) });
           }}
           style={{ width: '100%' }}
         />
@@ -194,11 +234,43 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
           value={content.caption || ''}
           onChange={(e) => {
             onValidate(e.target.value);
-            onUpdate({ caption: sanitizeText(e.target.value) });
+            onUpdate({ caption: sanitizeText(e.target.value, 1000) });
           }}
           style={{ width: '100%', resize: 'vertical' }}
         />
       </div>
+
+      {/* Safe Image Upload */}
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Post Image (PNG, JPG, WebP max 2MB)
+        </label>
+        {content.imageUrl ? (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: 6, fontSize: 12 }}>
+            <span style={{ color: '#38bdf8' }}>Image attached</span>
+            <button
+              type="button"
+              onClick={handleRemoveImage}
+              style={{ color: '#ef4444', fontSize: 11, fontWeight: 600 }}
+            >
+              Remove
+            </button>
+          </div>
+        ) : (
+          <input
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            onChange={handleImageUpload}
+            style={{ width: '100%', fontSize: 12 }}
+          />
+        )}
+        {imageError && (
+          <div style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>
+            {imageError}
+          </div>
+        )}
+      </div>
+
       <div style={{ display: 'flex', gap: 10 }}>
         <div style={{ flex: 1 }}>
           <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
@@ -426,18 +498,33 @@ const ShortVideoEditorFields: React.FC<TemplateFieldsProps<ShortVideoContent>> =
 
 export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange }) => {
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
+  const [isCritical, setIsCritical] = useState(false);
 
   const handleTextValidation = (text: string) => {
-    const check = checkDisallowedPatterns(text);
-    if (!check.isSafe) {
-      setWarningMessage(`Safety alert: "${check.flaggedTerms.join(', ')}" is not allowed in fictional mockups.`);
+    const classification = classifyDeceptiveContent(text);
+    if (!classification.isSafe) {
+      if (classification.isBlocked) {
+        setIsCritical(true);
+        setWarningMessage(
+          `Security Blocker: "${classification.criticalTerms.join(
+            ', '
+          )}" is prohibited. Export will be blocked until removed.`
+        );
+      } else {
+        setIsCritical(false);
+        setWarningMessage(
+          `Advisory Warning: "${classification.warningTerms.join(
+            ', '
+          )}" indicates sensitive content. Keep mockups clearly fictional.`
+        );
+      }
     } else {
       setWarningMessage(null);
     }
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const clean = sanitizeText(e.target.value);
+    const clean = sanitizeText(e.target.value, 120);
     handleTextValidation(clean);
     onChange({ ...project, title: clean });
   };
@@ -467,18 +554,18 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
       {warningMessage && (
         <div
           style={{
-            backgroundColor: 'rgba(239, 68, 68, 0.15)',
-            border: '1px solid #ef4444',
+            backgroundColor: isCritical ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.15)',
+            border: `1px solid ${isCritical ? '#ef4444' : '#f59e0b'}`,
             borderRadius: 6,
             padding: '8px 12px',
-            color: '#fca5a5',
+            color: isCritical ? '#fca5a5' : '#fde68a',
             fontSize: 12,
             display: 'flex',
             alignItems: 'center',
             gap: 8,
           }}
         >
-          <AlertTriangle size={16} color="#ef4444" />
+          {isCritical ? <ShieldAlert size={16} color="#ef4444" /> : <AlertTriangle size={16} color="#f59e0b" />}
           <span>{warningMessage}</span>
         </div>
       )}

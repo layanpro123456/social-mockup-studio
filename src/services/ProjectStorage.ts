@@ -1,5 +1,6 @@
 import { MockupProject } from '../models/types';
 import { validateProjectSchema, enforceSafetyInvariants } from '../features/safety/SafetyGuard';
+import { validateJsonFile } from '../features/safety/AssetSanitizer';
 
 const STORAGE_KEY = 'social_mockup_current_project';
 
@@ -40,6 +41,11 @@ export function exportProjectAsJSON(project: MockupProject): void {
 
 export async function importProjectFromJSON(file: File): Promise<{ project?: MockupProject; errors: string[] }> {
   try {
+    const fileCheck = validateJsonFile(file);
+    if (!fileCheck.isValid) {
+      return { errors: [fileCheck.error || 'Invalid JSON file.'] };
+    }
+
     const text = await file.text();
     const parsed = JSON.parse(text);
     const validation = validateProjectSchema(parsed);
@@ -51,3 +57,4 @@ export async function importProjectFromJSON(file: File): Promise<{ project?: Moc
     return { errors: [`Invalid JSON file: ${(err as Error).message}`] };
   }
 }
+
