@@ -78,6 +78,23 @@ export interface ProfileCardContent {
   isSampleMetric: boolean;
 }
 
+export interface StoryContent {
+  displayName: string;
+  handle: string;
+  timestamp: string;
+  caption: string;
+  backgroundColor?: string;
+  gradientFrom?: string;
+  gradientTo?: string;
+}
+
+export interface ShortVideoContent {
+  creator: string;
+  handle: string;
+  caption: string;
+  audioTrack?: string;
+}
+
 export interface ShortVideoFrame {
   id: string;
   durationMs: number;

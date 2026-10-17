@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { MockupProject, WatermarkPosition, ChatContent, FeedPostContent, ProfileCardContent } from '../../models/types';
+import {
+  MockupProject,
+  WatermarkPosition,
+  ChatContent,
+  FeedPostContent,
+  ProfileCardContent,
+  StoryContent,
+  ShortVideoContent,
+} from '../../models/types';
 import { checkDisallowedPatterns, sanitizeText } from '../../features/safety/SafetyGuard';
 import { AlertTriangle, Plus, Trash2, Info } from 'lucide-react';
 
@@ -272,6 +280,150 @@ const ProfileCardEditorFields: React.FC<TemplateFieldsProps<ProfileCardContent>>
   );
 };
 
+const StoryEditorFields: React.FC<TemplateFieldsProps<StoryContent>> = ({
+  content,
+  onUpdate,
+  onValidate,
+}) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Creator Name
+        </label>
+        <input
+          type="text"
+          value={content.displayName || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ displayName: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Sample Handle
+        </label>
+        <input
+          type="text"
+          value={content.handle || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ handle: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Story Sticker Caption
+        </label>
+        <textarea
+          rows={3}
+          value={content.caption || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ caption: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%', resize: 'vertical' }}
+        />
+      </div>
+      <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+            Gradient Top
+          </label>
+          <input
+            type="color"
+            value={content.gradientFrom || '#312e81'}
+            onChange={(e) => onUpdate({ gradientFrom: e.target.value })}
+            style={{ width: '100%', height: 36, padding: 2, cursor: 'pointer' }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+            Gradient Bottom
+          </label>
+          <input
+            type="color"
+            value={content.gradientTo || '#0f172a'}
+            onChange={(e) => onUpdate({ gradientTo: e.target.value })}
+            style={{ width: '100%', height: 36, padding: 2, cursor: 'pointer' }}
+          />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const ShortVideoEditorFields: React.FC<TemplateFieldsProps<ShortVideoContent>> = ({
+  content,
+  onUpdate,
+  onValidate,
+}) => {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Creator Name
+        </label>
+        <input
+          type="text"
+          value={content.creator || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ creator: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Sample Handle
+        </label>
+        <input
+          type="text"
+          value={content.handle || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ handle: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Reel Caption
+        </label>
+        <textarea
+          rows={2}
+          value={content.caption || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ caption: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%', resize: 'vertical' }}
+        />
+      </div>
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Fictional Audio Track Label
+        </label>
+        <input
+          type="text"
+          value={content.audioTrack || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ audioTrack: sanitizeText(e.target.value) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+    </div>
+  );
+};
+
 export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange }) => {
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
 
@@ -393,6 +545,21 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
           onValidate={handleTextValidation}
         />
       )}
+      {project.template === 'story' && (
+        <StoryEditorFields
+          content={project.content as unknown as StoryContent}
+          onUpdate={updateContent}
+          onValidate={handleTextValidation}
+        />
+      )}
+      {project.template === 'short-video' && (
+        <ShortVideoEditorFields
+          content={project.content as unknown as ShortVideoContent}
+          onUpdate={updateContent}
+          onValidate={handleTextValidation}
+        />
+      )}
     </div>
   );
 };
+
