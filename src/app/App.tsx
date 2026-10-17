@@ -179,25 +179,25 @@ export const App: React.FC = () => {
   return (
     <div className="app-container">
       {/* Top Header */}
-      <header className="app-header">
+      <header className="app-header ui-header">
         <div className="header-brand">
           <div
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
-              background: 'linear-gradient(135deg, #6366f1 0%, #a855f7 100%)',
+              width: 32,
+              height: 32,
+              borderRadius: 8,
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 2px 10px rgba(99, 102, 241, 0.4)',
               color: '#ffffff',
+              boxShadow: '0 2px 8px rgba(99, 102, 241, 0.3)',
             }}
           >
-            <Sparkles size={18} />
+            <Sparkles size={16} />
           </div>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <h1>Social Mockup Studio</h1>
               <span className="safety-pill">Fictional Mode Enforced</span>
             </div>
@@ -207,7 +207,7 @@ export const App: React.FC = () => {
           </div>
         </div>
 
-        <div className="header-actions">
+        <nav className="header-actions" aria-label="Project Actions">
           <input
             type="file"
             ref={fileInputRef}
@@ -257,36 +257,39 @@ export const App: React.FC = () => {
           >
             <Trash2 size={13} />
           </button>
-        </div>
+        </nav>
       </header>
 
-      {/* Safety Policy Reminder Bar */}
-      <div
+      {/* Safety Policy Reminder Sub-Bar */}
+      <aside
+        role="status"
+        aria-label="Safety Policy"
         style={{
-          backgroundColor: 'rgba(15, 23, 42, 0.8)',
-          borderBottom: '1px solid #1e293b',
-          padding: '6px 24px',
-          fontSize: 11.5,
+          backgroundColor: '#0a0f1d',
+          borderBottom: '1px solid #1a2538',
+          padding: '5px 24px',
+          fontSize: 11,
           color: '#94a3b8',
           display: 'flex',
           alignItems: 'center',
-          gap: 8,
+          gap: 6,
         }}
       >
-        <ShieldCheck size={14} color="#38bdf8" />
+        <ShieldCheck size={13} color="#38bdf8" />
         <span>
-          <strong>Ethical Boundary Reminder:</strong> All mockups are synthetic prototypes for design, social media planning, and storytelling. Permanent "FICTIONAL MOCKUP" label is automatically applied to all exports.
+          <strong>Ethical Boundary Reminder:</strong> All mockups are synthetic prototypes. Permanent "FICTIONAL MOCKUP" label is automatically applied.
         </span>
-      </div>
+      </aside>
 
       {/* Global Error Banner */}
       {importError && (
-        <div
+        <aside
+          role="alert"
           style={{
             backgroundColor: '#ef4444',
             color: 'white',
-            padding: '10px 24px',
-            fontSize: 13,
+            padding: '8px 24px',
+            fontSize: 12,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
@@ -302,30 +305,32 @@ export const App: React.FC = () => {
           >
             ✕
           </button>
-        </div>
+        </aside>
       )}
 
       {/* Main Studio Body */}
       <div className="main-content">
         {/* Left Column: Templates & Editor */}
-        <aside className="sidebar">
-          <div className="sidebar-section">
-            <div className="sidebar-title">1. Choose a Format</div>
+        <aside className="sidebar ui-aside" aria-label="Mockup Design Tools">
+          <section className="sidebar-section">
+            <h2 className="sidebar-title">1. Choose a Format</h2>
             <TemplateGallery
               currentTemplate={project.template}
               onSelectTemplate={handleSelectTemplate}
             />
-          </div>
+          </section>
 
-          <div className="sidebar-section" style={{ flex: 1 }}>
-            <div className="sidebar-title">2. Edit Mockup</div>
+          <section className="sidebar-section" style={{ flex: 1 }}>
+            <h2 className="sidebar-title">2. Edit Mockup</h2>
             <ProjectEditor project={project} onChange={setProject} />
-          </div>
+          </section>
         </aside>
 
         {/* Center: Live Canvas Viewport with Timeline Tray */}
         <main
-          className="canvas-viewport"
+          className="canvas-viewport ui-main"
+          role="main"
+          aria-label="Mockup Canvas Preview"
           style={{
             flexDirection: 'column',
             padding: project.template === 'short-video' ? '20px 20px 0 20px' : '32px',

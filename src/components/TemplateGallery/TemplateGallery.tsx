@@ -23,49 +23,25 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({
   const templates = Object.entries(TEMPLATE_METADATA) as [TemplateKind, typeof TEMPLATE_METADATA[TemplateKind]][];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+    <nav className="ui-cards-grid" aria-label="Template Formats">
       {templates.map(([key, item]) => {
         const isSelected = currentTemplate === key;
         return (
           <button
             key={key}
+            type="button"
             onClick={() => onSelectTemplate(key)}
-            style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 12,
-              padding: '12px 14px',
-              borderRadius: 8,
-              textAlign: 'left',
-              backgroundColor: isSelected ? 'rgba(79, 70, 229, 0.15)' : 'rgba(255, 255, 255, 0.03)',
-              border: isSelected ? '1px solid #4f46e5' : '1px solid #2e3c54',
-              color: '#f9fafb',
-              transition: 'all 0.15s ease',
-            }}
+            className={`ui-card-btn ${isSelected ? 'active' : ''}`}
+            title={`${item.name} — ${item.description}`}
+            aria-pressed={isSelected}
           >
-            <div
-              style={{
-                padding: 8,
-                borderRadius: 6,
-                backgroundColor: isSelected ? '#4f46e5' : '#1f2937',
-                color: '#ffffff',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              {ICONS[item.icon] || <Layout size={20} />}
+            <div className="ui-card-icon">
+              {ICONS[item.icon] || <Layout size={16} />}
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontWeight: 600, fontSize: 13, marginBottom: 2 }}>{item.name}</div>
-              <div style={{ fontSize: 11, color: '#9ca3af', lineHeight: 1.3 }}>{item.description}</div>
-              <div style={{ fontSize: 10, color: '#6366f1', marginTop: 4, fontWeight: 500 }}>
-                {item.defaultCanvas}
-              </div>
-            </div>
+            <span className="ui-card-title">{item.name}</span>
           </button>
         );
       })}
-    </div>
+    </nav>
   );
 };

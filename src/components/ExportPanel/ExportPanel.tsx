@@ -150,8 +150,8 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   };
 
   return (
-    <div className="export-pane">
-      <div
+    <aside className="export-pane ui-aside" aria-label="Export Panel">
+      <h2
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -164,12 +164,13 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         }}
       >
         <Download size={14} color="#818cf8" /> 3. Download Mockup
-      </div>
+      </h2>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div className="ui-form">
         {/* Critical Fraud Warning Banner */}
         {fraudCheck.isBlocked && (
-          <div
+          <aside
+            role="alert"
             style={{
               backgroundColor: 'rgba(239, 68, 68, 0.2)',
               border: '1px solid #ef4444',
@@ -188,13 +189,11 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
             <div style={{ fontSize: 11, lineHeight: 1.4 }}>
               Prohibited keywords found ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive terms like financial wires or legal notices to enable download.
             </div>
-          </div>
+          </aside>
         )}
 
-        <div>
-          <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: '#9ca3af', marginBottom: 6 }}>
-            Image Quality & Format
-          </label>
+        <div className="ui-field">
+          <label>Image Quality & Format</label>
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               type="button"
@@ -217,24 +216,21 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
 
         {/* Safety Invariant Notice */}
         <div
+          className="ui-badge ui-badge-success"
           style={{
-            backgroundColor: 'rgba(16, 185, 129, 0.08)',
-            border: '1px solid rgba(16, 185, 129, 0.25)',
+            padding: '8px 12px',
             borderRadius: 8,
-            padding: 12,
-            fontSize: 12,
-            color: '#34d399',
+            fontSize: 11,
+            lineHeight: 1.4,
             display: 'flex',
-            flexDirection: 'column',
+            alignItems: 'center',
             gap: 6,
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontWeight: 600 }}>
-            <ShieldCheck size={16} /> Trust & Safety Active
-          </div>
-          <div style={{ fontSize: 11, color: '#94a3b8', lineHeight: 1.4 }}>
-            Visible <strong>{MANDATORY_WATERMARK_TEXT}</strong> watermark is permanently applied to all exported images and video frames.
-          </div>
+          <ShieldCheck size={14} />
+          <span>
+            Permanent <strong>{MANDATORY_WATERMARK_TEXT}</strong> watermark embedded.
+          </span>
         </div>
 
         {/* Image Export Button */}
@@ -378,6 +374,6 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
           </div>
         )}
       </div>
-    </div>
+    </aside>
   );
 };
