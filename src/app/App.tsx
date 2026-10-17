@@ -20,13 +20,33 @@ import {
   FileUp,
   RotateCcw,
   AlertOctagon,
+  AlertTriangle,
+  CheckCircle2,
   Copy,
   Trash2,
   ShieldCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { cn } from '@/lib/utils';
+
+interface ToastNotification {
+  id: string;
+  type: 'success' | 'info' | 'warning' | 'destructive';
+  title: string;
+  description?: string;
+}
 
 export const App: React.FC = () => {
   const [project, setProject] = useState<MockupProject>(() => {
@@ -37,6 +57,17 @@ export const App: React.FC = () => {
   const [activeFrameIndex, setActiveFrameIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [importError, setImportError] = useState<string | null>(null);
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+
+  const showToast = (toast: Omit<ToastNotification, 'id'>) => {
+    const id = `toast_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+    setToasts((prev) => [...prev, { ...toast, id }]);
+    setTimeout(() => {
+      setToasts((prev) => prev.filter((t) => t.id !== id));
+    }, 3500);
+  };
 
   const canvasRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,15 +98,24 @@ export const App: React.FC = () => {
     setActiveFrameIndex(0);
     setIsPlaying(false);
     setImportError(null);
+    showToast({
+      type: 'info',
+      title: 'Template Selected',
+      description: `Loaded ${template} format.`,
+    });
   };
 
-  const handleReset = () => {
-    if (window.confirm('Reset current mockup to default template values?')) {
-      setProject(createDefaultProject(project.template));
-      setActiveFrameIndex(0);
-      setIsPlaying(false);
-      setImportError(null);
-    }
+  const confirmReset = () => {
+    setProject(createDefaultProject(project.template));
+    setActiveFrameIndex(0);
+    setIsPlaying(false);
+    setImportError(null);
+    setResetDialogOpen(false);
+    showToast({
+      type: 'warning',
+      title: 'Template Reset',
+      description: 'Mockup restored to default template structure.',
+    });
   };
 
   const handleDuplicate = () => {
@@ -87,15 +127,33 @@ export const App: React.FC = () => {
       updatedAt: new Date().toISOString(),
     };
     setProject(duplicated);
+    showToast({
+      type: 'success',
+      title: 'Mockup Duplicated',
+      description: `Created "${duplicated.title}".`,
+    });
   };
 
-  const handleDelete = () => {
-    if (window.confirm(`Delete project "${project.title}" and start fresh?`)) {
-      const fresh = createDefaultProject('chat');
-      setProject(fresh);
-      setActiveFrameIndex(0);
-      setIsPlaying(false);
-    }
+  const confirmDelete = () => {
+    const fresh = createDefaultProject('chat');
+    setProject(fresh);
+    setActiveFrameIndex(0);
+    setIsPlaying(false);
+    setDeleteDialogOpen(false);
+    showToast({
+      type: 'info',
+      title: 'New Canvas Started',
+      description: 'Canvas cleared. Ready with fresh Generic Chat.',
+    });
+  };
+
+  const handleSaveProject = () => {
+    exportProjectAsJSON(project);
+    showToast({
+      type: 'info',
+      title: 'Project Saved',
+      description: `Exported "${project.title}.json" file.`,
+    });
   };
 
   const handleImportClick = () => {
@@ -114,6 +172,11 @@ export const App: React.FC = () => {
       setActiveFrameIndex(0);
       setIsPlaying(false);
       setImportError(null);
+      showToast({
+        type: 'success',
+        title: 'Project Imported',
+        description: `Successfully loaded "${result.project.title}".`,
+      });
     }
     // Reset file input
     e.target.value = '';
@@ -234,7 +297,7 @@ export const App: React.FC = () => {
             type="button"
             variant="secondary"
             size="sm"
-            onClick={handleReset}
+            onClick={() => setResetDialogOpen(true)}
             title="Reset to Template Defaults"
           >
             <RotateCcw size={13} className="mr-1.5" /> Start Fresh
@@ -252,7 +315,7 @@ export const App: React.FC = () => {
             type="button"
             variant="secondary"
             size="sm"
-            onClick={() => exportProjectAsJSON(project)}
+            onClick={handleSaveProject}
             title="Save Project File to Computer (.json)"
           >
             <FileDown size={13} className="mr-1.5" /> Save Project
@@ -261,7 +324,7 @@ export const App: React.FC = () => {
             type="button"
             variant="ghost"
             size="icon"
-            onClick={handleDelete}
+            onClick={() => setDeleteDialogOpen(true)}
             className="text-red-400 hover:text-red-300 hover:bg-red-500/10 h-8 w-8"
             title="Delete Project & Start Fresh"
           >
@@ -293,18 +356,21 @@ export const App: React.FC = () => {
 
       {/* Global Error Banner */}
       {importError && (
-        <Alert variant="destructive" className="rounded-none border-x-0 border-t-0 py-2 px-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <AlertOctagon size={16} />
-            <AlertDescription className="text-xs font-medium">{importError}</AlertDescription>
+        <Alert variant="destructive" className="rounded-none border-x-0 border-t-0 py-2.5 px-6 flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
+            <AlertOctagon className="h-4 w-4 shrink-0 text-red-400" />
+            <div>
+              <AlertTitle className="text-xs font-semibold text-red-200">Import Failed</AlertTitle>
+              <AlertDescription className="text-xs font-medium text-red-300">{importError}</AlertDescription>
+            </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setImportError(null)}
-            className="h-6 w-6 p-0 text-white hover:bg-white/20"
+            className="h-7 px-2.5 text-xs text-red-200 hover:bg-red-500/20"
           >
-            ✕
+            Dismiss
           </Button>
         </Alert>
       )}
@@ -375,6 +441,101 @@ export const App: React.FC = () => {
           canvasRef={canvasRef}
           onExportVideo={handleVideoExport}
         />
+      </div>
+
+      {/* Alert Dialog: Reset Template Confirmation */}
+      <AlertDialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2.5 text-amber-400 mb-1">
+              <RotateCcw className="h-5 w-5" />
+              <AlertDialogTitle className="text-base text-slate-100 font-semibold">
+                Reset Mockup to Defaults?
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-slate-300 text-xs leading-relaxed">
+              This will revert all fields and content in the current <strong className="text-white capitalize">{project.template}</strong> template back to initial sample state. Any unsaved edits will be discarded.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white text-xs">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmReset}
+              className="bg-amber-600 hover:bg-amber-500 text-white font-medium text-xs shadow-lg shadow-amber-600/30"
+            >
+              Yes, Reset Template
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Alert Dialog: Delete Project Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="bg-slate-900 border border-slate-800 text-slate-100 shadow-2xl">
+          <AlertDialogHeader>
+            <div className="flex items-center gap-2.5 text-red-400 mb-1">
+              <Trash2 className="h-5 w-5" />
+              <AlertDialogTitle className="text-base text-slate-100 font-semibold">
+                Delete Project & Start Fresh?
+              </AlertDialogTitle>
+            </div>
+            <AlertDialogDescription className="text-slate-300 text-xs leading-relaxed">
+              Are you sure you want to delete <strong className="text-white">"{project.title}"</strong>? This will erase the current canvas and start a fresh Generic Chat mockup.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-4">
+            <AlertDialogCancel className="border-slate-700 bg-slate-800/80 text-slate-200 hover:bg-slate-700 hover:text-white text-xs">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-500 text-white font-medium text-xs shadow-lg shadow-red-600/30"
+            >
+              Yes, Delete & Start Fresh
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Floating Toast Notification Stack */}
+      <div
+        className="fixed bottom-5 right-5 z-50 flex flex-col gap-2.5 max-w-sm pointer-events-none"
+        aria-live="polite"
+      >
+        {toasts.map((t) => (
+          <div
+            key={t.id}
+            className={cn(
+              'pointer-events-auto flex items-start gap-3 p-3.5 rounded-xl border shadow-xl backdrop-blur-xl transition-all duration-300 animate-in slide-in-from-bottom-3 fade-in',
+              t.type === 'success' && 'bg-emerald-950/90 border-emerald-500/50 text-emerald-100 shadow-emerald-500/10',
+              t.type === 'info' && 'bg-sky-950/90 border-sky-500/50 text-sky-100 shadow-sky-500/10',
+              t.type === 'warning' && 'bg-amber-950/90 border-amber-500/50 text-amber-100 shadow-amber-500/10',
+              t.type === 'destructive' && 'bg-red-950/90 border-red-500/50 text-red-100 shadow-red-500/10'
+            )}
+          >
+            <div className="shrink-0 mt-0.5">
+              {t.type === 'success' && <CheckCircle2 className="h-4 w-4 text-emerald-400" />}
+              {t.type === 'info' && <Sparkles className="h-4 w-4 text-sky-400" />}
+              {t.type === 'warning' && <AlertTriangle className="h-4 w-4 text-amber-400" />}
+              {t.type === 'destructive' && <AlertOctagon className="h-4 w-4 text-red-400" />}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold leading-tight">{t.title}</p>
+              {t.description && (
+                <p className="text-[11px] opacity-85 mt-0.5 leading-snug">{t.description}</p>
+              )}
+            </div>
+            <button
+              onClick={() => setToasts((prev) => prev.filter((item) => item.id !== t.id))}
+              className="shrink-0 text-xs opacity-60 hover:opacity-100 p-0.5 text-current rounded"
+              aria-label="Dismiss toast"
+            >
+              ✕
+            </button>
+          </div>
+        ))}
       </div>
     </div>
   );

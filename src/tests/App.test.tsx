@@ -68,4 +68,25 @@ describe('Social Mockup Studio App', () => {
 
     expect(screen.getByDisplayValue('My Awesome Storyboard')).toBeInTheDocument();
   });
+
+  it('opens styled alert dialog when Start Fresh is clicked', () => {
+    render(<App />);
+
+    const startFreshButton = screen.getByTitle('Reset to Template Defaults');
+    fireEvent.click(startFreshButton);
+
+    expect(screen.getByText('Reset Mockup to Defaults?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Yes, Reset Template/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument();
+  });
+
+  it('opens styled alert dialog when Delete Project is clicked', () => {
+    render(<App />);
+
+    const deleteButton = screen.getByTitle(/Delete Project & Start Fresh/i);
+    fireEvent.click(deleteButton);
+
+    expect(screen.getByText('Delete Project & Start Fresh?')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Yes, Delete & Start Fresh/i })).toBeInTheDocument();
+  });
 });

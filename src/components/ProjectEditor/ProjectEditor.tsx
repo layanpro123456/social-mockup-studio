@@ -25,7 +25,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
@@ -308,9 +308,10 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
           />
         )}
         {imageError && (
-          <div style={{ color: '#ef4444', fontSize: 11, marginTop: 4 }}>
-            {imageError}
-          </div>
+          <Alert variant="destructive" className="mt-2 py-2 px-3">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription className="text-xs">{imageError}</AlertDescription>
+          </Alert>
         )}
       </div>
 
@@ -625,15 +626,13 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
     <form className="ui-form" onSubmit={(e) => e.preventDefault()}>
       {warningMessage && (
         <Alert
-          variant={isCritical ? 'destructive' : 'default'}
-          className={cn(
-            'py-2 px-3 text-xs flex items-center gap-2',
-            isCritical
-              ? 'border-red-500/50 bg-red-950/40 text-red-200'
-              : 'border-amber-500/50 bg-amber-950/30 text-amber-200'
-          )}
+          variant={isCritical ? 'destructive' : 'warning'}
+          className="mb-2"
         >
-          {isCritical ? <ShieldAlert size={16} /> : <AlertTriangle size={16} />}
+          {isCritical ? <ShieldAlert className="h-4 w-4" /> : <AlertTriangle className="h-4 w-4" />}
+          <AlertTitle className="text-xs font-semibold">
+            {isCritical ? 'Security Violation' : 'Deceptive Content Warning'}
+          </AlertTitle>
           <AlertDescription className="text-xs font-medium">{warningMessage}</AlertDescription>
         </Alert>
       )}
@@ -1081,9 +1080,13 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
               })}
             </div>
 
-            <div className="ui-badge ui-badge-warning" style={{ borderRadius: 6, padding: '6px 10px', fontSize: 11, lineHeight: 1.4 }}>
-              The <strong>FICTIONAL MOCKUP</strong> watermark protects prototypes from being misused as real evidence.
-            </div>
+            <Alert variant="warning" className="py-2.5 px-3">
+              <ShieldAlert className="h-4 w-4" />
+              <AlertTitle className="text-xs font-semibold">Mandatory Fictional Marker</AlertTitle>
+              <AlertDescription className="text-[11px] leading-relaxed">
+                The <strong className="text-amber-200">FICTIONAL MOCKUP</strong> watermark protects prototypes from being misused as real evidence.
+              </AlertDescription>
+            </Alert>
           </div>
         </fieldset>
       )}

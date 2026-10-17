@@ -171,11 +171,11 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
       <div className="ui-form">
         {/* Critical Fraud Warning Banner */}
         {fraudCheck.isBlocked && (
-          <Alert variant="destructive" className="border-red-500/50 bg-red-950/40">
+          <Alert variant="destructive" className="py-3 px-3.5 shadow-xl shadow-red-950/40">
             <ShieldAlert size={16} />
-            <AlertTitle className="text-xs font-bold text-red-400">Download Blocked</AlertTitle>
-            <AlertDescription className="text-xs text-red-300">
-              Prohibited keywords found ({fraudCheck.blockedTerms.join(', ')}). Remove deceptive terms like financial wires or legal notices to enable download.
+            <AlertTitle className="text-xs font-bold text-red-200">Download Blocked</AlertTitle>
+            <AlertDescription className="text-xs text-red-300/90 leading-relaxed mt-1">
+              Prohibited keywords found: <span className="font-semibold text-red-100 bg-red-900/60 px-1 py-0.5 rounded text-[11px]">{fraudCheck.blockedTerms.join(', ')}</span>. Remove deceptive terms like financial wires or legal notices to enable download.
             </AlertDescription>
           </Alert>
         )}
@@ -331,22 +331,12 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         )}
 
         {statusMessage && (
-          <div
-            style={{
-              padding: '8px 12px',
-              borderRadius: 6,
-              fontSize: 12,
-              backgroundColor: isError ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)',
-              color: isError ? '#fca5a5' : '#6ee7b7',
-              border: `1px solid ${isError ? '#ef4444' : '#10b981'}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            {isError ? <AlertCircle size={14} /> : <CheckCircle size={14} />}
-            <span>{statusMessage}</span>
-          </div>
+          <Alert variant={isError ? 'destructive' : 'success'} className="py-2.5 px-3">
+            {isError ? <AlertCircle size={15} /> : <CheckCircle size={15} />}
+            <AlertDescription className="text-xs font-medium">
+              {statusMessage}
+            </AlertDescription>
+          </Alert>
         )}
       </div>
     </aside>
