@@ -5,6 +5,13 @@ export type TemplateKind =
   | 'story'
   | 'short-video';
 
+export type PresetStyle =
+  | 'default'
+  | 'whatsapp-style' // Emerald Messaging
+  | 'facebook-style' // Community Feed
+  | 'twitter-style'  // Microblog
+  | 'instagram-style'; // Visual Story
+
 export type WatermarkPosition =
   | 'top-left'
   | 'top-right'
@@ -25,6 +32,11 @@ export interface FictionalLabel {
   position: WatermarkPosition;
 }
 
+export interface AudioNoteData {
+  durationSec: number;
+  playedSec?: number;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -33,6 +45,7 @@ export interface ChatMessage {
   timestamp: string;
   isSelf: boolean;
   status?: 'sent' | 'delivered' | 'read';
+  audioNote?: AudioNoteData;
 }
 
 export interface ChatContent {
@@ -52,6 +65,16 @@ export interface FeedComment {
   handle: string;
   text: string;
   timestamp: string;
+  likesCount?: number;
+}
+
+export interface ReactionCounts {
+  like: number;
+  love: number;
+  haha: number;
+  wow?: number;
+  sad?: number;
+  angry?: number;
 }
 
 export interface FeedPostContent {
@@ -64,6 +87,9 @@ export interface FeedPostContent {
   likesCount: number;
   commentsCount: number;
   sharesCount: number;
+  reactions?: ReactionCounts;
+  viewsCount?: number;
+  repostsCount?: number;
   comments: FeedComment[];
 }
 
@@ -107,6 +133,7 @@ export interface MockupProject {
   id: string;
   title: string;
   template: TemplateKind;
+  presetStyle?: PresetStyle;
   mockup: true;
   createdAt: string;
   updatedAt: string;

@@ -16,6 +16,16 @@ import {
   ShieldAlert,
   Music,
   Bookmark,
+  Globe,
+  ThumbsUp,
+  Repeat,
+  Play,
+  Mic,
+  Paperclip,
+  Smile,
+  MoreHorizontal,
+  ArrowLeft,
+  Lock,
 } from 'lucide-react';
 
 interface PreviewCanvasProps {
@@ -25,7 +35,7 @@ interface PreviewCanvasProps {
 
 export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
   ({ project, activeFrameIndex = 0 }, ref) => {
-    const { template, fictionalLabel, theme } = project;
+    const { template, presetStyle, fictionalLabel, theme } = project;
 
     const renderWatermark = () => (
       <div
@@ -37,7 +47,248 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       </div>
     );
 
+    /* -------------------------------------------------------------
+     * CHAT RENDERING (Generic vs. WhatsApp-Inspired Emerald Style)
+     * ------------------------------------------------------------- */
     const renderChat = (content: ChatContent) => {
+      const isWhatsApp = presetStyle === 'whatsapp-style';
+
+      if (isWhatsApp) {
+        return (
+          <div
+            style={{
+              width: 380,
+              minHeight: 590,
+              backgroundColor: '#efeae2',
+              backgroundImage:
+                'radial-gradient(#d1d7db 1px, transparent 1px), radial-gradient(#d1d7db 1px, #efeae2 1px)',
+              backgroundSize: '20px 20px',
+              color: '#111b21',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              borderRadius: 14,
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            }}
+          >
+            {/* Emerald Header */}
+            <div
+              style={{
+                padding: '10px 14px',
+                backgroundColor: '#008069',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <ArrowLeft size={18} style={{ cursor: 'pointer' }} />
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  backgroundColor: '#075e54',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: 16,
+                  fontWeight: 700,
+                  color: '#ffffff',
+                }}
+              >
+                💬
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {content.conversationTitle || 'Fictional Chat'}
+                </div>
+                <div style={{ fontSize: 11, color: '#e0f2fe' }}>online (fictional prototype)</div>
+              </div>
+              <MoreHorizontal size={18} />
+            </div>
+
+            {/* Encrypted Notice Banner */}
+            <div style={{ padding: '8px 16px', display: 'flex', justifyContent: 'center' }}>
+              <div
+                style={{
+                  backgroundColor: '#ffeecd',
+                  borderRadius: 6,
+                  padding: '5px 10px',
+                  fontSize: 10,
+                  color: '#54656f',
+                  textAlign: 'center',
+                  maxWidth: '92%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  boxShadow: '0 1px 2px rgba(0,0,0,0.06)',
+                }}
+              >
+                <Lock size={10} />
+                <span>Messages and media are fictional for prototyping purposes.</span>
+              </div>
+            </div>
+
+            {/* Date Pill */}
+            <div style={{ display: 'flex', justifyContent: 'center', margin: '4px 0' }}>
+              <span
+                style={{
+                  backgroundColor: '#ffffff',
+                  padding: '3px 10px',
+                  borderRadius: 6,
+                  fontSize: 10,
+                  fontWeight: 600,
+                  color: '#54656f',
+                  boxShadow: '0 1px 1px rgba(0,0,0,0.1)',
+                  textTransform: 'uppercase',
+                }}
+              >
+                Today (Sample)
+              </span>
+            </div>
+
+            {/* Messages */}
+            <div style={{ flex: 1, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {content.messages?.map((msg) => (
+                <div
+                  key={msg.id}
+                  style={{
+                    alignSelf: msg.isSelf ? 'flex-end' : 'flex-start',
+                    maxWidth: '80%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: msg.isSelf ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: msg.isSelf ? '#d9fdd3' : '#ffffff',
+                      color: '#111b21',
+                      padding: '8px 12px',
+                      borderRadius: msg.isSelf ? '8px 8px 2px 8px' : '8px 8px 8px 2px',
+                      boxShadow: '0 1px 2px rgba(0,0,0,0.13)',
+                      fontSize: 13,
+                      lineHeight: 1.4,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {!msg.isSelf && (
+                      <div style={{ fontSize: 11, fontWeight: 700, color: '#128c7e', marginBottom: 2 }}>
+                        {msg.senderName}
+                      </div>
+                    )}
+
+                    {/* Audio Note Rendering if present */}
+                    {msg.audioNote ? (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px 0' }}>
+                        <div
+                          style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: '50%',
+                            backgroundColor: '#00a884',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#ffffff',
+                          }}
+                        >
+                          <Play size={14} style={{ marginLeft: 2 }} />
+                        </div>
+                        <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+                          {/* Synthetic Waveform Bars */}
+                          {[12, 18, 8, 22, 14, 26, 18, 10, 16, 24, 12, 20].map((h, idx) => (
+                            <div
+                              key={idx}
+                              style={{
+                                width: 3,
+                                height: h,
+                                backgroundColor: idx < 6 ? '#00a884' : '#8696a0',
+                                borderRadius: 1.5,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <span style={{ fontSize: 10, color: '#667781' }}>0:{msg.audioNote.durationSec || 14}</span>
+                      </div>
+                    ) : (
+                      <span>{msg.text}</span>
+                    )}
+
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color: '#667781',
+                        marginTop: 2,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        gap: 3,
+                      }}
+                    >
+                      <span>{msg.timestamp}</span>
+                      {msg.isSelf && (
+                        <span>
+                          <CheckCheck size={13} color="#53bdeb" />
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* WhatsApp Mock Input Bar */}
+            <div
+              style={{
+                padding: '8px 10px',
+                backgroundColor: '#f0f2f5',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#ffffff',
+                  padding: '7px 12px',
+                  borderRadius: 20,
+                  fontSize: 12,
+                  color: '#8696a0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                }}
+              >
+                <Smile size={16} color="#8696a0" />
+                <span style={{ flex: 1 }}>Message</span>
+                <Paperclip size={16} color="#8696a0" />
+              </div>
+              <div
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  backgroundColor: '#00a884',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#ffffff',
+                }}
+              >
+                <Mic size={16} />
+              </div>
+            </div>
+
+            {renderWatermark()}
+          </div>
+        );
+      }
+
+      // Generic Chat Layout
       return (
         <div
           style={{
@@ -178,7 +429,313 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       );
     };
 
+    /* -------------------------------------------------------------
+     * FEED POST RENDERING (Generic vs Facebook vs Twitter/X)
+     * ------------------------------------------------------------- */
     const renderFeedPost = (content: FeedPostContent) => {
+      const isFacebook = presetStyle === 'facebook-style';
+      const isTwitter = presetStyle === 'twitter-style';
+
+      // 1. Facebook-Inspired Community Feed Archetype
+      if (isFacebook) {
+        return (
+          <div
+            style={{
+              width: 440,
+              backgroundColor: '#ffffff',
+              color: '#050505',
+              borderRadius: 10,
+              padding: '14px 16px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              position: 'relative',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              border: '1px solid #ced0d4',
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: '#1877f2',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 16,
+                  }}
+                >
+                  {content.displayName ? content.displayName.charAt(0) : 'F'}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 14 }}>{content.displayName}</div>
+                  <div style={{ fontSize: 12, color: '#65676b', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>{content.timestamp || '2h'}</span>
+                    <span>•</span>
+                    <Globe size={12} />
+                  </div>
+                </div>
+              </div>
+              <MoreHorizontal size={18} color="#65676b" />
+            </div>
+
+            {/* Post Caption */}
+            <div style={{ fontSize: 14, lineHeight: 1.45, wordBreak: 'break-word', color: '#050505' }}>
+              {content.caption}
+            </div>
+
+            {/* Media */}
+            {content.imageUrl ? (
+              <img
+                src={content.imageUrl}
+                alt="Fictional post media"
+                style={{ width: '100%', borderRadius: 6, maxHeight: 320, objectFit: 'cover' }}
+              />
+            ) : null}
+
+            {/* Stacked Reaction Summary Bar */}
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 0',
+                borderBottom: '1px solid #ced0d4',
+                fontSize: 13,
+                color: '#65676b',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{ display: 'flex', marginLeft: 4 }}>
+                  <span style={{ fontSize: 14 }}>👍</span>
+                  <span style={{ fontSize: 14, marginLeft: -4 }}>❤️</span>
+                  <span style={{ fontSize: 14, marginLeft: -4 }}>😂</span>
+                </div>
+                <span style={{ fontWeight: 600 }}>{content.likesCount || 342}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <span>{content.commentsCount || 18} comments</span>
+                <span>{content.sharesCount || 5} shares</span>
+              </div>
+            </div>
+
+            {/* Action Row */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-around',
+                padding: '4px 0',
+                borderBottom: '1px solid #ced0d4',
+                color: '#65676b',
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  color: '#65676b',
+                  padding: '6px 12px',
+                  borderRadius: 4,
+                }}
+              >
+                <ThumbsUp size={16} /> Like
+              </button>
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  color: '#65676b',
+                  padding: '6px 12px',
+                  borderRadius: 4,
+                }}
+              >
+                <MessageCircle size={16} /> Comment
+              </button>
+              <button
+                type="button"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 6,
+                  color: '#65676b',
+                  padding: '6px 12px',
+                  borderRadius: 4,
+                }}
+              >
+                <Share2 size={16} /> Share
+              </button>
+            </div>
+
+            {/* Sample Nested Comment */}
+            {content.comments && content.comments.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: '50%',
+                    backgroundColor: '#1877f2',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 12,
+                  }}
+                >
+                  C
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div
+                    style={{
+                      backgroundColor: '#f0f2f5',
+                      padding: '8px 12px',
+                      borderRadius: 14,
+                      display: 'inline-block',
+                      maxWidth: '90%',
+                    }}
+                  >
+                    <div style={{ fontWeight: 700, fontSize: 12 }}>{content.comments[0].displayName}</div>
+                    <div style={{ fontSize: 13, color: '#050505', marginTop: 2 }}>{content.comments[0].text}</div>
+                  </div>
+                  <div style={{ fontSize: 11, color: '#65676b', marginTop: 3, display: 'flex', gap: 10 }}>
+                    <span style={{ fontWeight: 600 }}>Like</span>
+                    <span style={{ fontWeight: 600 }}>Reply</span>
+                    <span>1h</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {renderWatermark()}
+          </div>
+        );
+      }
+
+      // 2. Twitter / X-Inspired Microblog Post Archetype
+      if (isTwitter) {
+        return (
+          <div
+            style={{
+              width: 440,
+              backgroundColor: '#000000',
+              color: '#e7e9ea',
+              borderRadius: 14,
+              padding: '16px 20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 12,
+              position: 'relative',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+              border: '1px solid #2f3336',
+            }}
+          >
+            {/* Author Row */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: '50%',
+                    backgroundColor: '#1d9bf0',
+                    color: '#ffffff',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontWeight: 700,
+                    fontSize: 16,
+                  }}
+                >
+                  {content.displayName ? content.displayName.charAt(0) : 'X'}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: '#f7f9f9' }}>{content.displayName}</div>
+                  <div style={{ fontSize: 13, color: '#71767b' }}>
+                    {content.handle || '@sample_prototype'}
+                  </div>
+                </div>
+              </div>
+              <MoreHorizontal size={18} color="#71767b" />
+            </div>
+
+            {/* Post Content */}
+            <div style={{ fontSize: 15, lineHeight: 1.5, wordBreak: 'break-word', color: '#e7e9ea' }}>
+              {content.caption}
+            </div>
+
+            {/* Media */}
+            {content.imageUrl ? (
+              <img
+                src={content.imageUrl}
+                alt="Fictional post media"
+                style={{ width: '100%', borderRadius: 12, maxHeight: 320, objectFit: 'cover' }}
+              />
+            ) : null}
+
+            {/* Date & Views Row */}
+            <div
+              style={{
+                fontSize: 13,
+                color: '#71767b',
+                padding: '8px 0',
+                borderBottom: '1px solid #2f3336',
+                display: 'flex',
+                gap: 8,
+              }}
+            >
+              <span>10:24 AM · Oct 17, 2026</span>
+              <span>·</span>
+              <span>
+                <strong style={{ color: '#e7e9ea' }}>{content.viewsCount || '14.2K'}</strong> Views
+              </span>
+            </div>
+
+            {/* Action Metrics Row */}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                color: '#71767b',
+                paddingTop: 4,
+                fontSize: 13,
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <MessageCircle size={17} /> <span>{content.commentsCount || 18}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Repeat size={17} /> <span>{content.repostsCount || 84}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Heart size={17} /> <span>{content.likesCount || 342}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Bookmark size={17} />
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Share2 size={17} />
+              </div>
+            </div>
+
+            {renderWatermark()}
+          </div>
+        );
+      }
+
+      // 3. Generic Feed Post Layout
       return (
         <div
           style={{
@@ -296,6 +853,9 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       );
     };
 
+    /* -------------------------------------------------------------
+     * PROFILE CARD RENDERING
+     * ------------------------------------------------------------- */
     const renderProfileCard = (content: ProfileCardContent) => {
       return (
         <div
@@ -368,6 +928,9 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       );
     };
 
+    /* -------------------------------------------------------------
+     * STORY RENDERING
+     * ------------------------------------------------------------- */
     const renderStory = (content: StoryContent) => {
       return (
         <div
@@ -505,6 +1068,9 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
       );
     };
 
+    /* -------------------------------------------------------------
+     * SHORT VIDEO RENDERING
+     * ------------------------------------------------------------- */
     const renderShortVideo = (content: ShortVideoContent) => {
       const frames = project.frames || [];
       const currentFrame = frames[activeFrameIndex] || frames[0] || {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   MockupProject,
+  PresetStyle,
   WatermarkPosition,
   ChatContent,
   FeedPostContent,
@@ -18,7 +19,8 @@ import {
   createManagedObjectURL,
   revokeManagedObjectURL,
 } from '../../features/safety/AssetSanitizer';
-import { AlertTriangle, Plus, Trash2, Info, ShieldAlert } from 'lucide-react';
+import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
+import { AlertTriangle, Plus, Trash2, Info, ShieldAlert, Mic, Sparkles } from 'lucide-react';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -55,6 +57,25 @@ const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
       messages: [...(content.messages || []), newMsg],
     });
     setNewMessageText('');
+  };
+
+  const handleAddAudioNote = () => {
+    const newMsg = {
+      id: `msg_audio_${Date.now()}`,
+      senderId: isSelfSender ? 'user_self' : 'user_other',
+      senderName: isSelfSender ? 'You (Sample)' : 'Alex (Sample)',
+      text: 'Voice note (0:14)',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      isSelf: isSelfSender,
+      status: 'read' as const,
+      audioNote: {
+        durationSec: 14,
+        playedSec: 0,
+      },
+    };
+    onUpdate({
+      messages: [...(content.messages || []), newMsg],
+    });
   };
 
   const handleDeleteMessage = (id: string) => {
@@ -116,8 +137,23 @@ const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
             }}
             style={{ flex: 1 }}
           />
-          <button type="button" onClick={handleAddMessage} className="btn-primary" style={{ padding: '8px 12px' }}>
+          <button
+            type="button"
+            onClick={handleAddMessage}
+            className="btn-primary"
+            style={{ padding: '8px 12px' }}
+            title="Add Text Message"
+          >
             <Plus size={16} />
+          </button>
+          <button
+            type="button"
+            onClick={handleAddAudioNote}
+            className="btn-secondary"
+            style={{ padding: '8px 10px' }}
+            title="Add Synthetic Voice Note"
+          >
+            <Mic size={15} color="#10b981" />
           </button>
         </div>
       </div>
@@ -291,6 +327,34 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
             type="number"
             value={content.commentsCount ?? 0}
             onChange={(e) => onUpdate({ commentsCount: parseInt(e.target.value, 10) || 0 })}
+            style={{ width: '100%' }}
+          />
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10 }}>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+            Reposts / Shares
+          </label>
+          <input
+            type="number"
+            value={content.repostsCount ?? content.sharesCount ?? 0}
+            onChange={(e) => {
+              const val = parseInt(e.target.value, 10) || 0;
+              onUpdate({ repostsCount: val, sharesCount: val });
+            }}
+            style={{ width: '100%' }}
+          />
+        </div>
+        <div style={{ flex: 1 }}>
+          <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+            Views (Mock)
+          </label>
+          <input
+            type="number"
+            value={content.viewsCount ?? 14200}
+            onChange={(e) => onUpdate({ viewsCount: parseInt(e.target.value, 10) || 0 })}
             style={{ width: '100%' }}
           />
         </div>
@@ -569,6 +633,47 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
           <span>{warningMessage}</span>
         </div>
       )}
+
+      {/* Platform-Inspired Theme Preset */}
+      <div
+        style={{
+          backgroundColor: 'rgba(99, 102, 241, 0.08)',
+          padding: 12,
+          borderRadius: 8,
+          border: '1px solid rgba(99, 102, 241, 0.25)',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 6,
+            marginBottom: 6,
+            fontSize: 12,
+            fontWeight: 700,
+            color: '#a5b4fc',
+          }}
+        >
+          <Sparkles size={14} /> Platform-Inspired Theme
+        </div>
+        <select
+          value={project.presetStyle || 'default'}
+          onChange={(e) => {
+            const updated = applyPresetToProject(project, e.target.value as PresetStyle);
+            onChange(updated);
+          }}
+          style={{ width: '100%', fontSize: 13 }}
+        >
+          <option value="default">Modern Generic (Default)</option>
+          <option value="whatsapp-style">Emerald Messaging (WhatsApp-Inspired)</option>
+          <option value="facebook-style">Community Feed (Facebook-Inspired)</option>
+          <option value="twitter-style">Microblog Post (X-Inspired)</option>
+          <option value="instagram-style">Visual Story (Instagram-Inspired)</option>
+        </select>
+        <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 5, lineHeight: 1.3 }}>
+          {PLATFORM_PRESETS.find((p) => p.id === (project.presetStyle || 'default'))?.tagline}
+        </div>
+      </div>
 
       {/* Project Title */}
       <div>
