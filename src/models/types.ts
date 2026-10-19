@@ -10,7 +10,29 @@ export type PresetStyle =
   | 'whatsapp-style' // Emerald Messaging
   | 'facebook-style' // Community Feed
   | 'twitter-style'  // Microblog
-  | 'instagram-style'; // Visual Story
+  | 'instagram-style' // Visual Story
+  | 'imessage-style' // Apple iOS Messages
+  | 'linkedin-style'; // Professional Creator Post
+
+export type DeviceFrameType = 'none' | 'iphone' | 'browser' | 'card';
+export type BackdropStyle =
+  | 'none'
+  | 'gradient-purple'
+  | 'gradient-sunset'
+  | 'gradient-ocean'
+  | 'mesh-dark'
+  | 'slate'
+  | 'transparent';
+export type AspectRatioType = 'auto' | '1:1' | '16:9' | '9:16' | '4:5';
+export type VerifiedBadgeType = 'none' | 'blue' | 'gold' | 'gray';
+
+export interface PresentationConfig {
+  frameType: DeviceFrameType;
+  backdrop: BackdropStyle;
+  aspectRatio: AspectRatioType;
+  padding: number;
+  shadow: 'none' | 'subtle' | 'elevated' | 'glow';
+}
 
 export type WatermarkPosition =
   | 'top-left'
@@ -52,6 +74,9 @@ export interface ChatContent {
   conversationTitle: string;
   contactAvatarUrl?: string;
   contactIsOnline?: boolean;
+  typingIndicator?: boolean;
+  verifiedBadge?: VerifiedBadgeType;
+  isSMSMode?: boolean;
   participants: Array<{
     id: string;
     name: string;
@@ -77,11 +102,15 @@ export interface ReactionCounts {
   wow?: number;
   sad?: number;
   angry?: number;
+  celebrate?: number;
+  insight?: number;
 }
 
 export interface FeedPostContent {
   displayName: string;
   handle: string;
+  authorTitle?: string;
+  verifiedBadge?: VerifiedBadgeType;
   avatarUrl?: string;
   timestamp: string;
   caption: string;
@@ -99,6 +128,7 @@ export interface ProfileCardContent {
   displayName: string;
   handle: string;
   avatarUrl?: string;
+  verifiedBadge?: VerifiedBadgeType;
   bio: string;
   followersCount: number;
   followingCount: number;
@@ -167,6 +197,7 @@ export interface MockupProject {
   fictionalLabel: FictionalLabel;
   statusBar?: DeviceStatusBarConfig;
   notificationBanner?: NotificationBannerConfig;
+  presentation?: PresentationConfig;
   content: Record<string, unknown>;
   frames?: ShortVideoFrame[];
 }

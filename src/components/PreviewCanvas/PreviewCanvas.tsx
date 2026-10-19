@@ -35,6 +35,8 @@ import {
 import { DeviceStatusBar } from '../DeviceStatusBar/DeviceStatusBar';
 import { NotificationBanner } from '../NotificationBanner/NotificationBanner';
 import { MockupAvatar } from '../common/MockupAvatar';
+import { VerifiedBadge } from '../common/VerifiedBadge';
+import { PresentationFrame } from '../common/PresentationFrame';
 
 interface PreviewCanvasProps {
   project: MockupProject;
@@ -45,13 +47,19 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
   ({ project, activeFrameIndex = 0 }, ref) => {
     const { template, presetStyle, fictionalLabel, theme } = project;
 
+    const label = project.fictionalLabel || {
+      text: 'FICTIONAL MOCKUP' as const,
+      enabled: true as const,
+      position: 'bottom-right' as const,
+    };
+
     const renderWatermark = () => (
       <div
-        className={`watermark-badge watermark-${fictionalLabel.position}`}
+        className={`watermark-badge watermark-${label.position || 'bottom-right'}`}
         data-testid="fictional-mockup-watermark"
       >
         <ShieldAlert size={12} style={{ display: 'inline', marginRight: 4, verticalAlign: -1 }} />
-        {fictionalLabel.text}
+        {label.text || 'FICTIONAL MOCKUP'}
       </div>
     );
 
@@ -121,10 +129,13 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                 showOnlineDot={content.contactIsOnline ?? true}
               />
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {content.conversationTitle || 'Fictional Chat'}
+                <div style={{ fontWeight: 600, fontSize: 14, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span>{content.conversationTitle || 'Fictional Chat'}</span>
+                  <VerifiedBadge type={content.verifiedBadge} size={14} />
                 </div>
-                <div style={{ fontSize: 11, color: '#e0f2fe' }}>online (fictional prototype)</div>
+                <div style={{ fontSize: 11, color: '#e0f2fe' }}>
+                  {content.typingIndicator ? 'typing...' : 'online (fictional prototype)'}
+                </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                 <Video size={17} style={{ cursor: 'pointer', opacity: 0.95 }} />
@@ -315,7 +326,195 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
         );
       }
 
-      // Generic Chat Layout
+      // 2. Apple iOS iMessage Archetype
+      if (presetStyle === 'imessage-style') {
+        const isSMS = content.isSMSMode ?? false;
+        const bubbleColor = isSMS ? '#34c759' : '#007aff';
+
+        return (
+          <div
+            data-testid="imessage-chat-mockup"
+            style={{
+              width: 380,
+              minHeight: 600,
+              backgroundColor: '#ffffff',
+              color: '#000000',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              borderRadius: 14,
+              overflow: 'hidden',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.15)',
+              fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif',
+            }}
+          >
+            {/* iOS Status Bar */}
+            <DeviceStatusBar
+              config={project.statusBar}
+              theme="light"
+              style={{ backgroundColor: 'rgba(255, 255, 255, 0.95)' }}
+            />
+
+            {/* iOS iMessage Navigation Header */}
+            <div
+              style={{
+                padding: '8px 14px 10px',
+                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                borderBottom: '1px solid #e5e5ea',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: 2, color: '#007aff', cursor: 'pointer', fontSize: 16, fontWeight: 500 }}>
+                <span style={{ fontSize: 22, lineHeight: 1 }}>‹</span>
+                <span style={{ fontSize: 15 }}>Chats</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', minWidth: 0, flex: 1, padding: '0 8px' }}>
+                <MockupAvatar
+                  src={content.contactAvatarUrl}
+                  name={content.conversationTitle || 'Contact'}
+                  size={36}
+                  accentColor="#007aff"
+                />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 3, marginTop: 2, maxWidth: '100%' }}>
+                  <span style={{ fontWeight: 600, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {content.conversationTitle || 'Contact'}
+                  </span>
+                  <VerifiedBadge type={content.verifiedBadge} size={13} />
+                  <span style={{ fontSize: 10, color: '#8e8e93' }}>›</span>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#007aff' }}>
+                <Video size={19} style={{ cursor: 'pointer' }} />
+              </div>
+            </div>
+
+            {/* Notification Banner Overlay if enabled */}
+            <NotificationBanner config={project.notificationBanner} />
+
+            {/* Timestamp / Channel pill */}
+            <div style={{ textAlign: 'center', padding: '12px 0 6px', fontSize: 11, color: '#8e8e93', fontWeight: 500 }}>
+              {isSMS ? 'Text Message • SMS' : 'iMessage'}
+            </div>
+
+            {/* Messages Thread */}
+            <div style={{ flex: 1, padding: '10px 14px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {content.messages?.map((msg) => (
+                <div
+                  key={msg.id}
+                  style={{
+                    alignSelf: msg.isSelf ? 'flex-end' : 'flex-start',
+                    maxWidth: '75%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: msg.isSelf ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  <div
+                    style={{
+                      backgroundColor: msg.isSelf ? bubbleColor : '#e5e5ea',
+                      color: msg.isSelf ? '#ffffff' : '#000000',
+                      padding: '8px 14px',
+                      borderRadius: 18,
+                      borderBottomRightRadius: msg.isSelf ? 4 : 18,
+                      borderBottomLeftRadius: msg.isSelf ? 18 : 4,
+                      fontSize: 14,
+                      lineHeight: 1.35,
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {msg.text}
+                  </div>
+                  {msg.isSelf && (
+                    <div style={{ fontSize: 10, color: '#8e8e93', marginTop: 2, marginRight: 2 }}>
+                      {msg.status === 'read' ? `Read ${msg.timestamp}` : 'Delivered'}
+                    </div>
+                  )}
+                  {!msg.isSelf && (
+                    <div style={{ fontSize: 10, color: '#8e8e93', marginTop: 2, marginLeft: 2 }}>
+                      {msg.timestamp}
+                    </div>
+                  )}
+                </div>
+              ))}
+
+              {/* Typing indicator (3 bouncing dots) */}
+              {content.typingIndicator && (
+                <div
+                  data-testid="imessage-typing-indicator"
+                  style={{
+                    alignSelf: 'flex-start',
+                    backgroundColor: '#e5e5ea',
+                    padding: '8px 14px',
+                    borderRadius: 18,
+                    borderBottomLeftRadius: 4,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: 4,
+                    marginTop: 2,
+                  }}
+                >
+                  <span className="animate-bounce inline-block w-2 h-2 rounded-full bg-[#8e8e93]" style={{ animationDelay: '0ms' }} />
+                  <span className="animate-bounce inline-block w-2 h-2 rounded-full bg-[#8e8e93]" style={{ animationDelay: '150ms' }} />
+                  <span className="animate-bounce inline-block w-2 h-2 rounded-full bg-[#8e8e93]" style={{ animationDelay: '300ms' }} />
+                </div>
+              )}
+            </div>
+
+            {/* iMessage Input Bar */}
+            <div
+              style={{
+                padding: '8px 12px 14px',
+                backgroundColor: '#ffffff',
+                borderTop: '1px solid #e5e5ea',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8,
+              }}
+            >
+              <div
+                style={{
+                  width: 28,
+                  height: 28,
+                  borderRadius: '50%',
+                  backgroundColor: '#e5e5ea',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#8e8e93',
+                  fontWeight: 600,
+                  fontSize: 18,
+                  cursor: 'pointer',
+                }}
+              >
+                +
+              </div>
+              <div
+                style={{
+                  flex: 1,
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d1d1d6',
+                  padding: '6px 12px',
+                  borderRadius: 18,
+                  fontSize: 13,
+                  color: '#8e8e93',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <span>{isSMS ? 'Text Message' : 'iMessage'}</span>
+                <Mic size={14} color="#8e8e93" />
+              </div>
+            </div>
+
+            {renderWatermark()}
+          </div>
+        );
+      }
+
+      // 3. Generic Chat Layout
       return (
         <div
           style={{
@@ -363,12 +562,16 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
                 }}
               >
-                {content.conversationTitle || 'Fictional Conversation'}
+                <span>{content.conversationTitle || 'Fictional Conversation'}</span>
+                <VerifiedBadge type={content.verifiedBadge} size={14} />
               </div>
               <div style={{ fontSize: 11, color: '#94a3b8' }}>
-                {content.participants?.length || 2} participants (Synthetic sample)
+                {content.typingIndicator ? 'typing...' : `${content.participants?.length || 2} participants (Synthetic sample)`}
               </div>
             </div>
           </div>
@@ -428,6 +631,24 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                 </div>
               </div>
             ))}
+
+            {content.typingIndicator && (
+              <div
+                style={{
+                  alignSelf: 'flex-start',
+                  backgroundColor: '#334155',
+                  padding: '8px 12px',
+                  borderRadius: 14,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 4,
+                }}
+              >
+                <span className="animate-bounce inline-block w-1.5 h-1.5 rounded-full bg-slate-300" style={{ animationDelay: '0ms' }} />
+                <span className="animate-bounce inline-block w-1.5 h-1.5 rounded-full bg-slate-300" style={{ animationDelay: '150ms' }} />
+                <span className="animate-bounce inline-block w-1.5 h-1.5 rounded-full bg-slate-300" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
           </div>
 
           {/* Generic Mock Input Bar */}
@@ -566,7 +787,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   accentColor="#1877f2"
                 />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{content.displayName}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>{content.displayName}</span>
+                    <VerifiedBadge type={content.verifiedBadge} size={14} />
+                  </div>
                   <div style={{ fontSize: 12, color: '#65676b', display: 'flex', alignItems: 'center', gap: 4 }}>
                     <span>{content.timestamp || '2h'}</span>
                     <span>•</span>
@@ -754,7 +978,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
                   accentColor="#1d9bf0"
                 />
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 15, color: '#f7f9f9' }}>{content.displayName}</div>
+                  <div style={{ fontWeight: 700, fontSize: 15, color: '#f7f9f9', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span>{content.displayName}</span>
+                    <VerifiedBadge type={content.verifiedBadge} size={15} />
+                  </div>
                   <div style={{ fontSize: 13, color: '#71767b' }}>
                     {content.handle || '@sample_prototype'}
                   </div>
@@ -879,7 +1106,186 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
         );
       }
 
-      // 3. Generic Feed Post Layout
+      // 3. LinkedIn-Inspired B2B Creator Post Archetype
+      if (presetStyle === 'linkedin-style') {
+        const reactions = content.reactions || {
+          like: content.likesCount || 1420,
+          celebrate: 420,
+          insight: 180,
+        };
+        const totalReactions = (reactions.like || 0) + (reactions.celebrate || 0) + (reactions.insight || 0) + (reactions.love || 0);
+
+        return (
+          <div
+            data-testid="linkedin-post-mockup"
+            style={{
+              width: 440,
+              backgroundColor: '#ffffff',
+              color: '#181818',
+              borderRadius: 12,
+              overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
+              position: 'relative',
+              boxShadow: '0 4px 16px rgba(0,0,0,0.08)',
+              border: '1px solid #e0e0e0',
+              fontFamily: '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+            }}
+          >
+            {/* Top Device Status Bar */}
+            <DeviceStatusBar
+              config={project.statusBar}
+              theme="light"
+              style={{ backgroundColor: '#ffffff', borderBottom: '1px solid #f3f2ef' }}
+            />
+
+            {/* Notification Banner Overlay if enabled */}
+            <NotificationBanner config={project.notificationBanner} />
+
+            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+              {/* LinkedIn Author Header */}
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <MockupAvatar
+                    src={content.avatarUrl}
+                    name={content.displayName || 'LinkedIn Creator'}
+                    size={48}
+                    accentColor="#0a66c2"
+                  />
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ fontWeight: 700, fontSize: 14, color: '#181818' }}>
+                        {content.displayName}
+                      </span>
+                      <VerifiedBadge type={content.verifiedBadge || 'blue'} size={14} />
+                      <span style={{ fontSize: 12, color: '#575757' }}>• 1st</span>
+                    </div>
+                    {content.authorTitle && (
+                      <div style={{ fontSize: 11, color: '#575757', lineHeight: 1.3, marginTop: 1, maxWidth: 280 }}>
+                        {content.authorTitle}
+                      </div>
+                    )}
+                    <div style={{ fontSize: 11, color: '#8c8c8c', marginTop: 2 }}>
+                      {content.timestamp || '2h • 🌐'}
+                    </div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <button
+                    type="button"
+                    style={{
+                      color: '#0a66c2',
+                      fontWeight: 600,
+                      fontSize: 13,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 3,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <span>+</span> Follow
+                  </button>
+                  <MoreHorizontal size={18} color="#575757" style={{ cursor: 'pointer' }} />
+                </div>
+              </div>
+
+              {/* LinkedIn Post Text */}
+              <div style={{ fontSize: 13, lineHeight: 1.5, color: '#181818', whiteSpace: 'pre-line' }}>
+                {content.caption}
+              </div>
+
+              {/* Media if present */}
+              {content.imageUrl && (
+                <img
+                  src={content.imageUrl}
+                  alt="Post preview"
+                  style={{ width: '100%', borderRadius: 8, maxHeight: 320, objectFit: 'cover' }}
+                />
+              )}
+
+              {/* LinkedIn Reaction Counts Bar */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '8px 0 6px',
+                  borderBottom: '1px solid #ebebeb',
+                  fontSize: 11,
+                  color: '#575757',
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    <span style={{ fontSize: 14, marginRight: -3, zIndex: 3 }}>👍</span>
+                    <span style={{ fontSize: 14, marginRight: -3, zIndex: 2 }}>👏</span>
+                    <span style={{ fontSize: 14, zIndex: 1 }}>💡</span>
+                  </span>
+                  <span style={{ marginLeft: 6, fontWeight: 500 }}>
+                    {totalReactions.toLocaleString()}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <span>{content.commentsCount || 12} comments</span>
+                  <span>•</span>
+                  <span>{content.sharesCount || 4} reposts</span>
+                </div>
+              </div>
+
+              {/* LinkedIn Action Buttons Row */}
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-around',
+                  padding: '6px 0 2px',
+                  color: '#575757',
+                  fontSize: 12,
+                  fontWeight: 600,
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <ThumbsUp size={16} /> <span>Like</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <MessageCircle size={16} /> <span>Comment</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <Repeat size={16} /> <span>Repost</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                  <Share2 size={16} /> <span>Send</span>
+                </div>
+              </div>
+
+              {/* Comments */}
+              {content.comments && content.comments.length > 0 && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+                  {content.comments.map((c) => (
+                    <div
+                      key={c.id}
+                      style={{
+                        fontSize: 12,
+                        backgroundColor: '#f2f2f2',
+                        padding: '8px 12px',
+                        borderRadius: 8,
+                      }}
+                    >
+                      <div style={{ fontWeight: 700, color: '#181818' }}>{c.displayName}</div>
+                      <div style={{ color: '#404040', marginTop: 2 }}>{c.text}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {renderWatermark()}
+          </div>
+        );
+      }
+
+      // 4. Generic Feed Post Layout
       return (
         <div
           style={{
@@ -913,7 +1319,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
               accentColor={theme.accent || '#3b82f6'}
             />
             <div>
-              <div style={{ fontWeight: 600, fontSize: 14 }}>{content.displayName}</div>
+              <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>{content.displayName}</span>
+                <VerifiedBadge type={content.verifiedBadge} size={14} />
+              </div>
               <div style={{ fontSize: 12, color: '#94a3b8' }}>
                 {content.handle} • {content.timestamp}
               </div>
@@ -1035,7 +1444,10 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
             />
 
             <div style={{ marginTop: 12 }}>
-              <div style={{ fontWeight: 700, fontSize: 18 }}>{content.displayName}</div>
+              <div style={{ fontWeight: 700, fontSize: 18, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>{content.displayName}</span>
+                <VerifiedBadge type={content.verifiedBadge} size={16} />
+              </div>
               <div style={{ fontSize: 13, color: '#94a3b8' }}>{content.handle}</div>
               <p style={{ marginTop: 10, fontSize: 13, color: '#cbd5e1', lineHeight: 1.4 }}>
                 {content.bio}
@@ -1457,17 +1869,19 @@ export const PreviewCanvas = forwardRef<HTMLDivElement, PreviewCanvasProps>(
           fontFamily: theme.fontFamily || 'sans-serif',
         }}
       >
-        {template === 'chat' && renderChat(project.content as unknown as ChatContent)}
-        {template === 'feed-post' && renderFeedPost(project.content as unknown as FeedPostContent)}
-        {template === 'profile-card' && renderProfileCard(project.content as unknown as ProfileCardContent)}
-        {template === 'story' && renderStory(project.content as unknown as StoryContent)}
-        {template === 'short-video' && renderShortVideo(project.content as unknown as ShortVideoContent)}
-        {template !== 'chat' &&
-          template !== 'feed-post' &&
-          template !== 'profile-card' &&
-          template !== 'story' &&
-          template !== 'short-video' &&
-          renderGenericOrFallback()}
+        <PresentationFrame config={project.presentation}>
+          {template === 'chat' && renderChat(project.content as unknown as ChatContent)}
+          {template === 'feed-post' && renderFeedPost(project.content as unknown as FeedPostContent)}
+          {template === 'profile-card' && renderProfileCard(project.content as unknown as ProfileCardContent)}
+          {template === 'story' && renderStory(project.content as unknown as StoryContent)}
+          {template === 'short-video' && renderShortVideo(project.content as unknown as ShortVideoContent)}
+          {template !== 'chat' &&
+            template !== 'feed-post' &&
+            template !== 'profile-card' &&
+            template !== 'story' &&
+            template !== 'short-video' &&
+            renderGenericOrFallback()}
+        </PresentationFrame>
       </div>
     );
   }

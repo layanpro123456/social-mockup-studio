@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { MockupProject } from '../../models/types';
-import { toPng, toJpeg } from 'html-to-image';
+import { toPng, toJpeg, toBlob } from 'html-to-image';
 import { isMediaRecorderSupported } from '../../services/VideoExportService';
 import { classifyDeceptiveContent, MANDATORY_WATERMARK_TEXT } from '../../features/safety/SafetyGuard';
 import {
@@ -11,6 +11,8 @@ import {
   Video,
   XCircle,
   ShieldAlert,
+  Copy,
+  Check,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -48,6 +50,7 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
   const [exportProgress, setExportProgress] = useState<{ percent: number; message: string } | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
+  const [copied, setCopied] = useState(false);
   const cancelExportRef = useRef(false);
 
   const isVideoSupported = isMediaRecorderSupported();
@@ -100,6 +103,56 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
     } catch (err) {
       setIsError(true);
       setStatusMessage(`Export failed: ${(err as Error).message}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleCopyToClipboard = async () => {
+    if (fraudCheck.isBlocked) {
+      setIsError(true);
+      setStatusMessage(
+        `Security Block: Copy prohibited. Detected deceptive keyword(s): "${fraudCheck.blockedTerms.join(
+          ', '
+        )}".`
+      );
+      return;
+    }
+
+    if (!canvasRef.current) {
+      setIsError(true);
+      setStatusMessage('Canvas element not found for copying.');
+      return;
+    }
+
+    const watermark = canvasRef.current.querySelector('[data-testid="fictional-mockup-watermark"]');
+    if (!watermark) {
+      setIsError(true);
+      setStatusMessage('Safety violation: Watermark must be present on export canvas.');
+      return;
+    }
+
+    try {
+      setIsExporting(true);
+      setStatusMessage('Rendering mockup for clipboard...');
+      setIsError(false);
+
+      const blob = await toBlob(canvasRef.current, { cacheBust: true, pixelRatio: 2 });
+      if (!blob) throw new Error('Could not generate image blob');
+
+      if (navigator.clipboard && window.ClipboardItem) {
+        await navigator.clipboard.write([
+          new ClipboardItem({ 'image/png': blob }),
+        ]);
+        setCopied(true);
+        setStatusMessage('Copied directly to clipboard! Ready to paste into Twitter, Slack, or Docs.');
+        setTimeout(() => setCopied(false), 3000);
+      } else {
+        throw new Error('ClipboardItem API not supported in this environment.');
+      }
+    } catch (err) {
+      setIsError(true);
+      setStatusMessage(`Copy to clipboard failed: ${(err as Error).message}`);
     } finally {
       setIsExporting(false);
     }
@@ -224,16 +277,37 @@ export const ExportPanel: React.FC<ExportPanelProps> = ({
         </div>
 
         {/* Image Export Button */}
-        <Button
-          type="button"
-          variant="default"
-          size="lg"
-          onClick={handleExportImage}
-          disabled={isExporting || fraudCheck.isBlocked}
-          className="w-full justify-center text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md transition-all"
-        >
-          <Download size={16} className="mr-2" /> Download Mockup ({format.toUpperCase()})
-        </Button>
+        <div className="flex flex-col gap-2">
+          <Button
+            type="button"
+            variant="default"
+            size="lg"
+            onClick={handleExportImage}
+            disabled={isExporting || fraudCheck.isBlocked}
+            className="w-full justify-center text-sm font-bold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-md transition-all"
+          >
+            <Download size={16} className="mr-2" /> Download Mockup ({format.toUpperCase()})
+          </Button>
+
+          <Button
+            type="button"
+            variant="outline"
+            size="default"
+            onClick={handleCopyToClipboard}
+            disabled={isExporting || fraudCheck.isBlocked}
+            className="w-full justify-center text-xs font-semibold bg-slate-900 border-slate-700 hover:bg-slate-800 text-slate-200"
+          >
+            {copied ? (
+              <>
+                <Check size={14} className="mr-2 text-emerald-400" /> Copied to Clipboard!
+              </>
+            ) : (
+              <>
+                <Copy size={14} className="mr-2 text-indigo-400" /> Copy Image to Clipboard
+              </>
+            )}
+          </Button>
+        </div>
 
         {/* Video Export Option for Short Video Template */}
         {project.template === 'short-video' && (

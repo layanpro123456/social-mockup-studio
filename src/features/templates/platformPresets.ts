@@ -38,6 +38,18 @@ export const PLATFORM_PRESETS: PresetInfo[] = [
     tagline: 'Vibrant gradient story rings, segmented progress ticks, and sticker prompts.',
     compatibleTemplates: ['story', 'feed-post'],
   },
+  {
+    id: 'imessage-style',
+    name: 'iOS iMessage (Apple-Inspired)',
+    tagline: 'Authentic blue/green bubbles, incoming gray bubbles, typing indicator, and iOS header.',
+    compatibleTemplates: ['chat'],
+  },
+  {
+    id: 'linkedin-style',
+    name: 'B2B Creator Post (LinkedIn-Inspired)',
+    tagline: 'Professional post with author headline, connection degree, and celebrate reactions.',
+    compatibleTemplates: ['feed-post'],
+  },
 ];
 
 export function applyPresetToProject(project: MockupProject, preset: PresetStyle): MockupProject {
@@ -131,6 +143,51 @@ export function applyPresetToProject(project: MockupProject, preset: PresetStyle
         textColor: '#ffffff',
         cardBackground: '#121212',
       };
+      break;
+
+    case 'imessage-style':
+      updated.theme = {
+        background: '#ffffff',
+        accent: '#007aff',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif',
+        textColor: '#000000',
+        cardBackground: '#f2f2f7',
+      };
+      if (project.template === 'chat') {
+        const chat = project.content as unknown as ChatContent;
+        updated.content = {
+          ...chat,
+          conversationTitle: chat.conversationTitle || 'Alex Morgan',
+          typingIndicator: chat.typingIndicator ?? true,
+          verifiedBadge: chat.verifiedBadge ?? 'blue',
+          isSMSMode: chat.isSMSMode ?? false,
+        };
+      }
+      break;
+
+    case 'linkedin-style':
+      updated.theme = {
+        background: '#f3f2ef',
+        accent: '#0a66c2',
+        fontFamily: '-apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif',
+        textColor: '#181818',
+        cardBackground: '#ffffff',
+      };
+      if (project.template === 'feed-post') {
+        const feed = project.content as unknown as FeedPostContent;
+        updated.content = {
+          ...feed,
+          authorTitle: feed.authorTitle || 'Founder & CEO @ Stealth Startup | Building the future of AI | Forbes 30u30',
+          verifiedBadge: feed.verifiedBadge ?? 'blue',
+          reactions: feed.reactions || {
+            like: 1243,
+            love: 512,
+            haha: 45,
+            celebrate: 320,
+            insight: 189,
+          },
+        };
+      }
       break;
 
     default:

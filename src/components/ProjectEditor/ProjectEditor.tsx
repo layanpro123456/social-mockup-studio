@@ -8,6 +8,7 @@ import {
   ProfileCardContent,
   StoryContent,
   ShortVideoContent,
+  VerifiedBadgeType,
 } from '../../models/types';
 import {
   checkDisallowedPatterns,
@@ -20,6 +21,7 @@ import {
   revokeManagedObjectURL,
 } from '../../features/safety/AssetSanitizer';
 import { applyPresetToProject, PLATFORM_PRESETS } from '../../features/templates/platformPresets';
+import { VIRAL_SCENARIOS } from '../../features/templates/viralScenarios';
 import {
   AlertTriangle,
   Plus,
@@ -33,6 +35,10 @@ import {
   ShieldCheck,
   Check,
   Upload,
+  Laptop,
+  Palette,
+  Layout,
+  Zap,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -42,6 +48,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { MockupAvatar } from '../common/MockupAvatar';
+import { VerifiedBadge } from '../common/VerifiedBadge';
 
 interface ProjectEditorProps {
   project: MockupProject;
@@ -197,6 +204,46 @@ const AvatarUploadField: React.FC<AvatarUploadFieldProps> = ({
   );
 };
 
+interface VerifiedBadgeSelectorProps {
+  value?: VerifiedBadgeType;
+  onChange: (badge: VerifiedBadgeType) => void;
+}
+
+const VerifiedBadgeSelector: React.FC<VerifiedBadgeSelectorProps> = ({ value = 'none', onChange }) => {
+  return (
+    <div>
+      <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 6 }}>
+        Verified Checkmark Badge
+      </label>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+        {[
+          { id: 'none', label: 'None' },
+          { id: 'blue', label: 'Blue' },
+          { id: 'gold', label: 'Gold' },
+          { id: 'gray', label: 'Gray' },
+        ].map((b) => {
+          const isSelected = (value || 'none') === b.id;
+          return (
+            <button
+              key={b.id}
+              type="button"
+              onClick={() => onChange(b.id as VerifiedBadgeType)}
+              className={`px-2 py-1.5 rounded-md text-xs font-medium border flex items-center justify-center gap-1.5 transition-all ${
+                isSelected
+                  ? 'bg-blue-600/20 border-blue-500 text-blue-300 shadow-sm'
+                  : 'bg-slate-800/60 border-slate-700/60 text-slate-400 hover:bg-slate-800 hover:text-slate-200'
+              }`}
+            >
+              <VerifiedBadge type={b.id as VerifiedBadgeType} size={13} />
+              <span>{b.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
   content,
   onUpdate,
@@ -263,6 +310,32 @@ const ChatEditorFields: React.FC<TemplateFieldsProps<ChatContent>> = ({
           }}
           style={{ width: '100%' }}
         />
+      </div>
+
+      <VerifiedBadgeSelector
+        value={content.verifiedBadge}
+        onChange={(badge) => onUpdate({ verifiedBadge: badge })}
+      />
+
+      <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap' }}>
+        <label className="text-[11px] text-slate-300 flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={content.typingIndicator ?? false}
+            onChange={(e) => onUpdate({ typingIndicator: e.target.checked })}
+            className="rounded border-slate-700 bg-slate-800"
+          />
+          Show Typing Dots (•••)
+        </label>
+        <label className="text-[11px] text-slate-300 flex items-center gap-1.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={content.isSMSMode ?? false}
+            onChange={(e) => onUpdate({ isSMSMode: e.target.checked })}
+            className="rounded border-slate-700 bg-slate-800"
+          />
+          SMS Green Bubble Mode
+        </label>
       </div>
 
       <AvatarUploadField
@@ -436,6 +509,27 @@ const FeedPostEditorFields: React.FC<TemplateFieldsProps<FeedPostContent>> = ({
         />
       </div>
 
+      <div>
+        <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>
+          Author Headline / Bio Subtitle (Optional)
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. Founder & CEO @ Startup | Forbes 30u30"
+          value={content.authorTitle || ''}
+          onChange={(e) => {
+            onValidate(e.target.value);
+            onUpdate({ authorTitle: sanitizeText(e.target.value, 120) });
+          }}
+          style={{ width: '100%' }}
+        />
+      </div>
+
+      <VerifiedBadgeSelector
+        value={content.verifiedBadge}
+        onChange={(badge) => onUpdate({ verifiedBadge: badge })}
+      />
+
       <AvatarUploadField
         label="Author Profile Picture"
         avatarUrl={content.avatarUrl}
@@ -580,6 +674,11 @@ const ProfileCardEditorFields: React.FC<TemplateFieldsProps<ProfileCardContent>>
           style={{ width: '100%' }}
         />
       </div>
+
+      <VerifiedBadgeSelector
+        value={content.verifiedBadge}
+        onChange={(badge) => onUpdate({ verifiedBadge: badge })}
+      />
 
       <AvatarUploadField
         label="Profile Picture"
@@ -768,7 +867,7 @@ const ShortVideoEditorFields: React.FC<TemplateFieldsProps<ShortVideoContent>> =
 };
 
 export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange }) => {
-  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'phone' | 'watermark'>('content');
+  const [activeTab, setActiveTab] = useState<'content' | 'style' | 'studio' | 'phone' | 'watermark'>('content');
   const [warningMessage, setWarningMessage] = useState<string | null>(null);
   const [isCritical, setIsCritical] = useState(false);
 
@@ -836,6 +935,39 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
         </Alert>
       )}
 
+      {/* Viral Scenario Packs 1-Click Loader */}
+      <div className="bg-gradient-to-r from-purple-950/40 via-indigo-950/40 to-slate-900 border border-purple-500/20 rounded-xl p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-1.5">
+            <Zap size={14} className="text-amber-400" />
+            <span className="text-xs font-bold text-purple-200">Viral Scenario Packs</span>
+            <Badge variant="outline" className="text-[10px] bg-purple-500/10 text-purple-300 border-purple-500/30 py-0 px-1.5">
+              1-Click
+            </Badge>
+          </div>
+          <span className="text-[10px] text-slate-400">Curated viral ideas</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+          {VIRAL_SCENARIOS.map((scenario) => (
+            <button
+              key={scenario.id}
+              type="button"
+              onClick={() => {
+                const newProj = scenario.createProject();
+                onChange(newProj);
+              }}
+              className="bg-slate-900/80 hover:bg-purple-900/40 border border-slate-800 hover:border-purple-500/40 rounded-lg p-2 text-left transition-all group"
+              title={scenario.description}
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="text-base group-hover:scale-110 transition-transform">{scenario.emoji}</span>
+                <span className="text-xs font-medium text-slate-200 truncate">{scenario.title}</span>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Mockup Title Header */}
       <div className="space-y-1.5">
         <Label htmlFor="mockup-title-input" className="text-xs font-medium text-slate-400">
@@ -853,18 +985,21 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
 
       {/* shadcn Tabs Navigation */}
       <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as any)} className="w-full">
-        <TabsList className="grid grid-cols-4 w-full bg-slate-900/90 border border-slate-800 p-1 rounded-lg">
+        <TabsList className="grid grid-cols-5 w-full bg-slate-900/90 border border-slate-800 p-1 rounded-lg">
           <TabsTrigger value="content" className="text-xs font-semibold">
-            <MessageSquare size={13} className="mr-1.5" /> Content
+            <MessageSquare size={13} className="mr-1" /> Content
           </TabsTrigger>
           <TabsTrigger value="style" className="text-xs font-semibold">
-            <Sparkles size={13} className="mr-1.5" /> Style
+            <Sparkles size={13} className="mr-1" /> Presets
+          </TabsTrigger>
+          <TabsTrigger value="studio" className="text-xs font-semibold">
+            <Laptop size={13} className="mr-1" /> Studio
           </TabsTrigger>
           <TabsTrigger value="phone" className="text-xs font-semibold">
-            <Smartphone size={13} className="mr-1.5" /> Phone Bar
+            <Smartphone size={13} className="mr-1" /> Phone
           </TabsTrigger>
           <TabsTrigger value="watermark" className="text-xs font-semibold">
-            <ShieldCheck size={13} className="mr-1.5" /> Watermark
+            <ShieldCheck size={13} className="mr-1" /> Watermark
           </TabsTrigger>
         </TabsList>
       </Tabs>
@@ -910,16 +1045,18 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
         </section>
       )}
 
-      {/* TAB 2: STYLE */}
+      {/* TAB 2: STYLE (PRESETS) */}
       {activeTab === 'style' && (
         <fieldset className="ui-fieldset">
           <legend className="ui-legend">
-            <Sparkles size={12} color="#a5b4fc" /> Platform Style
+            <Sparkles size={12} color="#a5b4fc" /> Platform Preset Archetypes
           </legend>
           <div className="ui-cards-grid" style={{ marginTop: 8 }}>
             {[
               { id: 'default', label: 'Modern Clean', icon: '✨' },
-              { id: 'whatsapp-style', label: 'WhatsApp', icon: '💬' },
+              { id: 'imessage-style', label: 'Apple iMessage', icon: '💬' },
+              { id: 'linkedin-style', label: 'LinkedIn B2B', icon: '💼' },
+              { id: 'whatsapp-style', label: 'WhatsApp', icon: '🟢' },
               { id: 'facebook-style', label: 'Facebook', icon: '👍' },
               { id: 'twitter-style', label: 'X / Twitter', icon: '𝕏' },
             ].map((p) => {
@@ -946,6 +1083,153 @@ export const ProjectEditor: React.FC<ProjectEditorProps> = ({ project, onChange 
             })}
           </div>
         </fieldset>
+      )}
+
+      {/* TAB: STUDIO (PRESENTATION, BACKDROPS & ASPECT RATIOS) */}
+      {activeTab === 'studio' && (
+        <div className="ui-form space-y-4">
+          {/* Device Frame */}
+          <fieldset className="ui-fieldset">
+            <legend className="ui-legend">
+              <Laptop size={12} color="#a5b4fc" /> Device Bezel & Frame
+            </legend>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {[
+                { id: 'none', label: 'None (Direct)', icon: '📐' },
+                { id: 'iphone', label: 'iPhone 16 Pro', icon: '📱' },
+                { id: 'browser', label: 'macOS Browser', icon: '💻' },
+                { id: 'card', label: '3D Studio Card', icon: '🃏' },
+              ].map((f) => {
+                const isSelected = (project.presentation?.deviceFrame || 'none') === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => {
+                      onChange({
+                        ...project,
+                        presentation: {
+                          ...(project.presentation || { backdrop: 'transparent', aspectRatio: 'auto', cardElevation: true }),
+                          deviceFrame: f.id as any,
+                        },
+                      });
+                    }}
+                    className={`ui-card-btn ${isSelected ? 'active' : ''}`}
+                    style={{ padding: '8px 10px', justifyContent: 'space-between' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span>{f.icon}</span>
+                      <span className="text-xs font-semibold">{f.label}</span>
+                    </div>
+                    {isSelected && <Check size={14} color="#a5b4fc" />}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {/* Backdrop Wallpaper */}
+          <fieldset className="ui-fieldset">
+            <legend className="ui-legend">
+              <Palette size={12} color="#a5b4fc" /> Studio Backdrop Wallpaper
+            </legend>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+              {[
+                { id: 'transparent', label: 'Transparent', icon: '⚪' },
+                { id: 'gradient-purple', label: 'Cosmic Purple', icon: '🔮' },
+                { id: 'gradient-sunset', label: 'Sunset Glow', icon: '🌅' },
+                { id: 'gradient-ocean', label: 'Deep Ocean', icon: '🌊' },
+                { id: 'mesh-dark', label: 'Midnight Mesh', icon: '✨' },
+                { id: 'slate', label: 'Dark Slate', icon: '⬛' },
+              ].map((b) => {
+                const isSelected = (project.presentation?.backdrop || 'transparent') === b.id;
+                return (
+                  <button
+                    key={b.id}
+                    type="button"
+                    onClick={() => {
+                      onChange({
+                        ...project,
+                        presentation: {
+                          ...(project.presentation || { deviceFrame: 'none', aspectRatio: 'auto', cardElevation: true }),
+                          backdrop: b.id as any,
+                        },
+                      });
+                    }}
+                    className={`ui-card-btn ${isSelected ? 'active' : ''}`}
+                    style={{ padding: '8px 10px', justifyContent: 'space-between' }}
+                  >
+                    <div className="flex items-center gap-1.5 text-left">
+                      <span>{b.icon}</span>
+                      <span className="text-xs font-semibold">{b.label}</span>
+                    </div>
+                    {isSelected && <Check size={14} color="#a5b4fc" />}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {/* Social Aspect Ratio */}
+          <fieldset className="ui-fieldset">
+            <legend className="ui-legend">
+              <Layout size={12} color="#a5b4fc" /> Social Aspect Ratio
+            </legend>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
+              {[
+                { id: 'auto', label: 'Auto (Fit)', desc: 'Adaptive size' },
+                { id: '1:1', label: '1:1 Square', desc: 'Instagram / X' },
+                { id: '16:9', label: '16:9 Wide', desc: 'Landscape / Deck' },
+                { id: '9:16', label: '9:16 Story', desc: 'TikTok / Reels' },
+                { id: '4:5', label: '4:5 Portrait', desc: 'LinkedIn / IG' },
+              ].map((r) => {
+                const isSelected = (project.presentation?.aspectRatio || 'auto') === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => {
+                      onChange({
+                        ...project,
+                        presentation: {
+                          ...(project.presentation || { deviceFrame: 'none', backdrop: 'transparent', cardElevation: true }),
+                          aspectRatio: r.id as any,
+                        },
+                      });
+                    }}
+                    className={`ui-card-btn ${isSelected ? 'active' : ''}`}
+                    style={{ padding: '8px 10px', flexDirection: 'column', alignItems: 'flex-start' }}
+                  >
+                    <div className="flex items-center justify-between w-full">
+                      <span className="text-xs font-semibold">{r.label}</span>
+                      {isSelected && <Check size={14} color="#a5b4fc" />}
+                    </div>
+                    <span className="text-[10px] text-slate-400 mt-0.5">{r.desc}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
+          {/* 3D Elevation */}
+          <label className="text-xs text-slate-300 flex items-center gap-2 cursor-pointer pt-1">
+            <input
+              type="checkbox"
+              checked={project.presentation?.cardElevation ?? true}
+              onChange={(e) => {
+                onChange({
+                  ...project,
+                  presentation: {
+                    ...(project.presentation || { deviceFrame: 'none', backdrop: 'transparent', aspectRatio: 'auto' }),
+                    cardElevation: e.target.checked,
+                  },
+                });
+              }}
+              className="rounded border-slate-700 bg-slate-800"
+            />
+            <span>Enable 3D Perspective Elevation & Shadow</span>
+          </label>
+        </div>
       )}
 
       {/* TAB 3: PHONE BAR */}
